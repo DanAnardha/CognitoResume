@@ -1,0 +1,2490 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Vacancy - Recruiter Dashboard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Flatpickr for date picker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Tooltip styles */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip-icon {
+            color: #6b7280;
+            cursor: help;
+            margin-left: 0.25rem;
+            font-size: 0.75rem;
+            transition: color 0.2s ease;
+        }
+
+        .tooltip-icon:hover {
+            color: #3b82f6;
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1f2937;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 400;
+            white-space: nowrap;
+            max-width: 250px;
+            white-space: normal;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+        }
+
+        .tooltip-container:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Info box styles */
+        .info-box {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 1px solid #bfdbfe;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-box-content {
+            font-size: 0.813rem;
+            color: #1e40af;
+            line-height: 1.5;
+        }
+
+        .recruiter-note {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #fcd34d;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.75rem;
+            color: #92400e;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        /* Standardize form input font size */
+        .form-input {
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            border-color: #3b82f6;
+        }
+
+        .form-input.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
+        .tag-input-container {
+            min-height: 60px;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .tag-input-container:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .tag-input-container.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
+        .tag-input-field {
+            flex: 1;
+            min-width: 200px;
+            border: none;
+            outline: none;
+            padding: 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .preview-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin: 0.25rem;
+            animation: fadeIn 0.3s ease;
+            transition: all 0.2s ease;
+        }
+
+        .preview-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .preview-badge.required-skills {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .preview-badge.nice-to-have {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .preview-badge.responsibilities {
+            background-color: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .preview-badge.certifications {
+            background-color: #fed7aa;
+            color: #92400e;
+        }
+
+        .preview-badge button {
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: inherit;
+        }
+
+        .preview-badge button:hover {
+            background: rgba(0, 0, 0, 0.2);
+            transform: scale(1.1);
+        }
+
+        .btn-primary {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Compact styles for weight inputs with smaller fonts */
+        .weight-container {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .weight-container:hover {
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .weight-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .weight-input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .weight-label {
+            flex: 1;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .weight-input-wrapper {
+            position: relative;
+            width: 70px;
+        }
+
+        .weight-input {
+            width: 100%;
+            padding-right: 1.75rem;
+            text-align: center;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .weight-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .weight-input.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .weight-suffix {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-weight: 500;
+            font-size: 0.75rem;
+            pointer-events: none;
+        }
+
+        .weight-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 0.75rem;
+        }
+
+        .weight-total {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .weight-total-value {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            min-width: 60px;
+            text-align: center;
+            font-size: 0.75rem;
+        }
+
+        .weight-total-value.valid {
+            color: #059669;
+            border-color: #10b981;
+            background-color: #ecfdf5;
+        }
+
+        .weight-total-value.invalid {
+            color: #dc2626;
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .weight-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+        }
+
+        .weight-preset {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        .weight-preset:hover {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border-color: #3b82f6;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Compact styles for salary range with smaller fonts */
+        .salary-range-container {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .salary-range-container:hover {
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .salary-range-container.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .salary-input-group {
+            position: relative;
+        }
+
+        .salary-input {
+            padding-left: 2rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+            font-size: 0.75rem;
+        }
+
+        .salary-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .salary-icon {
+            position: absolute;
+            left: 0.625rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .dual-slider-container {
+            position: relative;
+            height: 32px;
+            margin: 0.75rem 0;
+        }
+
+        .slider-track {
+            position: absolute;
+            width: 100%;
+            height: 5px;
+            background: #e2e8f0;
+            border-radius: 2.5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .slider-range {
+            position: absolute;
+            height: 5px;
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            border-radius: 2.5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .salary-slider {
+            position: absolute;
+            width: 100%;
+            height: 5px;
+            background: transparent;
+            outline: none;
+            -webkit-appearance: none;
+            pointer-events: none;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .salary-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+            pointer-events: all;
+        }
+
+        .salary-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25);
+        }
+
+        .salary-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+            pointer-events: all;
+        }
+
+        .salary-presets {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+
+        .salary-preset {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #e2e8f0;
+            background: white;
+        }
+
+        .salary-preset:hover {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border-color: #3b82f6;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .loading-spinner {
+            animation: shimmer 2s infinite;
+            background: linear-gradient(90deg, #f3f4f6 25%, #e0e7eb 50%, #f3f4f6 75%, #e0e7eb 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear infinite;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f4f6;
+            border-top: 5px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-size: 1rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        /* Modal styles - Elegant Neutral Design */
+        .modal-enter {
+            animation: modalEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .modal-exit {
+            animation: modalExit 0.25s ease-in forwards;
+        }
+
+        @keyframes modalEnter {
+            from {
+                transform: scale(0.96) translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes modalExit {
+            from {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: scale(0.96) translateY(20px);
+                opacity: 0;
+            }
+        }
+
+        /* Compact skill badges for modal */
+        .skill-badge {
+            display: inline-block;
+            padding: 0.125rem 0.375rem;
+            border-radius: 9999px;
+            font-size: 0.625rem;
+            font-weight: 500;
+            margin: 0.125rem;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            line-height: 1.2;
+        }
+
+        .skill-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .skill-badge.required {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-color: #bfdbfe;
+        }
+
+        .skill-badge.optional {
+            background-color: #d1fae5;
+            color: #065f46;
+            border-color: #a7f3d0;
+        }
+
+        .skill-badge.responsibility {
+            background-color: #ede9fe;
+            color: #5b21b6;
+            border-color: #ddd6fe;
+        }
+
+        .skill-badge.certification {
+            background-color: #fed7aa;
+            color: #92400e;
+            border-color: #fdba74;
+        }
+
+        /* Status badge styles */
+        .status-active {
+            background-color: #f0fdf4;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        .status-inactive {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border-color: #fecaca;
+        }
+
+        .status-draft {
+            background-color: #fffbeb;
+            color: #92400e;
+            border-color: #fde68a;
+        }
+
+        .status-closed {
+            background-color: #f9fafb;
+            color: #6b7280;
+            border-color: #e5e7eb;
+        }
+
+        /* AI Weights Grid */
+        .weight-grid-item {
+            transition: all 0.2s ease;
+        }
+
+        .weight-grid-item:hover {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Enhanced button styles */
+        .modal-button {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .modal-button:hover::before {
+            left: 100%;
+        }
+
+        /* Bullet points container */
+        .bullet-input-container {
+            min-height: 60px;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .bullet-input-container:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .bullet-input-container.error {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
+        .bullet-input-field {
+            border: none;
+            outline: none;
+            padding: 0.25rem;
+            font-size: 0.875rem;
+            width: 100%;
+        }
+
+        .bullet-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            background-color: #f8fafc;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+        }
+
+        .bullet-item:hover {
+            background-color: #f1f5f9;
+            transform: translateX(2px);
+        }
+
+        .bullet-item-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .bullet-item-text {
+            flex: 1;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        .bullet-item-remove {
+            background: rgba(239, 68, 68, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #ef4444;
+        }
+
+        .bullet-item-remove:hover {
+            background: rgba(239, 68, 68, 0.2);
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner-container">
+            <div class="spinner"></div>
+            <div class="loading-text">Creating vacancy...</div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal - Compact Design -->
+    <div id="confirmationModal" class="fixed inset-0 z-50 hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 transition-all duration-300" onclick="closeConfirmationModal()"></div>
+
+        <!-- Modal Container -->
+        <div class="relative flex items-center justify-center min-h-screen p-4">
+            <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col transform transition-all duration-300 scale-95 opacity-0"
+                id="modalContent">
+
+                <!-- Compact Header -->
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 flex-shrink-0">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="bg-white/10 backdrop-blur-sm p-1.5 rounded">
+                                <i class="fas fa-clipboard-check text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white">Review Vacancy</h3>
+                                <p class="text-blue-100 text-xs">Confirm details before posting</p>
+                            </div>
+                        </div>
+                        <button onclick="closeConfirmationModal()"
+                            class="bg-white/10 hover:bg-white/20 text-white p-1.5 rounded transition-all duration-200">
+                            <i class="fas fa-times text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Compact Content -->
+                <div class="p-4 overflow-y-auto flex-1 bg-gray-50">
+                    <!-- Job Description - Compact -->
+                    <div class="bg-white rounded-lg p-3 border border-gray-200 shadow-sm mb-3">
+                        <h4 class="text-sm font-semibold text-gray-800 mb-2 flex items-center">
+                            <i class="fas fa-file-alt text-blue-500 mr-2 text-xs"></i>
+                            Description
+                        </h4>
+                        <div class="bg-gray-50 rounded p-2 border border-gray-200">
+                            <p class="text-xs text-gray-700 leading-relaxed line-clamp-3" id="confirmDescription"></p>
+                        </div>
+                    </div>
+
+                    <!-- Job Details - Compact Grid -->
+                    <div class="bg-white rounded-lg p-3 border border-gray-200 shadow-sm mb-3">
+                        <h4 class="text-sm font-semibold text-gray-800 mb-2 flex items-center">
+                            <i class="fas fa-info-circle text-blue-500 mr-2 text-xs"></i>
+                            Job Details
+                        </h4>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <!-- Position -->
+                            <div class="bg-blue-50 rounded p-2 border border-blue-200">
+                                <p class="text-xs text-gray-500 uppercase">Position</p>
+                                <p class="text-xs font-semibold text-gray-900 truncate" id="confirmPosition"></p>
+                            </div>
+
+                            <!-- Department -->
+                            <div class="bg-purple-50 rounded p-2 border border-purple-200">
+                                <p class="text-xs text-gray-500 uppercase">Department</p>
+                                <p class="text-xs font-semibold text-gray-900 truncate" id="confirmDepartment"></p>
+                            </div>
+
+                            <!-- Experience -->
+                            <div class="bg-green-50 rounded p-2 border border-green-200">
+                                <p class="text-xs text-gray-500 uppercase">Experience</p>
+                                <p class="text-xs font-semibold text-gray-900 truncate" id="confirmExperienceLevel"></p>
+                            </div>
+
+                            <!-- Work Type -->
+                            <div class="bg-amber-50 rounded p-2 border border-amber-200">
+                                <p class="text-xs text-gray-500 uppercase">Work Type</p>
+                                <p class="text-xs font-semibold text-gray-900 truncate" id="confirmWorkType"></p>
+                            </div>
+
+                            <!-- Location -->
+                            <div class="bg-red-50 rounded p-2 border border-red-200">
+                                <p class="text-xs text-gray-500 uppercase">Location</p>
+                                <p class="text-xs font-semibold text-gray-900 truncate" id="confirmLocation"></p>
+                            </div>
+
+                            <!-- Salary -->
+                            <div class="bg-emerald-50 rounded p-2 border border-emerald-200">
+                                <p class="text-xs text-gray-500 uppercase">Salary</p>
+                                <p class="text-xs font-semibold text-gray-900 truncate" id="confirmSalary"></p>
+                            </div>
+
+                            <!-- Deadline -->
+                            <div class="bg-indigo-50 rounded p-2 border border-indigo-200">
+                                <p class="text-xs text-gray-500 uppercase">Deadline</p>
+                                <p class="text-xs font-semibold text-gray-900 truncate" id="confirmDeadline"></p>
+                            </div>
+
+                            <!-- Max Applicants -->
+                            <div class="bg-cyan-50 rounded p-2 border border-cyan-200">
+                                <p class="text-xs text-gray-500 uppercase">Max Apps</p>
+                                <p class="text-xs font-semibold text-gray-900 truncate" id="confirmMaxApplicants"></p>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="mt-2 flex items-center">
+                            <span class="text-xs font-medium text-gray-600 mr-2">Status:</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
+                                id="confirmStatusBadge"></span>
+                        </div>
+                    </div>
+
+                    <!-- Requirements - Compact -->
+                    <div class="bg-white rounded-lg p-3 border border-gray-200 shadow-sm mb-3">
+                        <h4 class="text-sm font-semibold text-gray-800 mb-2 flex items-center">
+                            <i class="fas fa-list-check text-blue-500 mr-2 text-xs"></i>
+                            Requirements
+                        </h4>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <!-- Required Skills -->
+                            <div class="bg-gray-50 rounded p-2 border border-gray-200">
+                                <h5 class="text-xs font-medium text-gray-700 mb-1 flex items-center">
+                                    <i class="fas fa-star text-blue-500 mr-1" style="font-size: 10px;"></i>
+                                    Required Skills
+                                </h5>
+                                <div class="flex flex-wrap gap-1" id="confirmRequiredSkills"></div>
+                            </div>
+
+                            <!-- Nice-to-Have Skills -->
+                            <div class="bg-gray-50 rounded p-2 border border-gray-200">
+                                <h5 class="text-xs font-medium text-gray-700 mb-1 flex items-center">
+                                    <i class="fas fa-thumbs-up text-green-500 mr-1" style="font-size: 10px;"></i>
+                                    Nice-to-Have
+                                </h5>
+                                <div class="flex flex-wrap gap-1" id="confirmNiceToHaveSkills"></div>
+                            </div>
+
+                            <!-- Responsibilities -->
+                            <div class="bg-gray-50 rounded p-2 border border-gray-200">
+                                <h5 class="text-xs font-medium text-gray-700 mb-1 flex items-center">
+                                    <i class="fas fa-tasks text-purple-500 mr-1" style="font-size: 10px;"></i>
+                                    Responsibilities
+                                </h5>
+                                <div class="flex flex-wrap gap-1" id="confirmResponsibilities"></div>
+                            </div>
+
+                            <!-- Certifications -->
+                            <div class="bg-gray-50 rounded p-2 border border-gray-200">
+                                <h5 class="text-xs font-medium text-gray-700 mb-1 flex items-center">
+                                    <i class="fas fa-certificate text-amber-500 mr-1" style="font-size: 10px;"></i>
+                                    Certifications
+                                </h5>
+                                <div class="flex flex-wrap gap-1" id="confirmCertifications"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Education - Compact -->
+                    <div class="bg-white rounded-lg p-3 border border-gray-200 shadow-sm mb-3">
+                        <h4 class="text-sm font-semibold text-gray-800 mb-2 flex items-center">
+                            <i class="fas fa-graduation-cap text-blue-500 mr-2 text-xs"></i>
+                            Education
+                        </h4>
+                        <div class="bg-gray-50 rounded p-2 border border-gray-200">
+                            <p class="text-xs text-gray-700" id="confirmEducation"></p>
+                        </div>
+                    </div>
+
+                    <!-- AI Weights - Ultra Compact & Professional -->
+                    <div class="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
+                        <h4 class="text-sm font-semibold text-gray-800 mb-3 flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-balance-scale text-blue-500 mr-2 text-xs"></i>
+                                AI Scoring Weights
+                            </div>
+                            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full"
+                                id="totalWeightDisplay">100%</span>
+                        </h4>
+
+                        <!-- Compact Weight Grid -->
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <div
+                                class="flex items-center justify-between bg-gray-50 rounded-lg p-2 border border-gray-200">
+                                <div class="flex items-center">
+                                    <i class="fas fa-graduation-cap text-blue-400 mr-2" style="font-size: 10px;"></i>
+                                    <span class="text-xs font-medium text-gray-700">Education</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-12 bg-gray-200 rounded-full h-1.5 mr-1">
+                                        <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-500"
+                                            id="eduBar" style="width: 0%"></div>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-900 w-7 text-right" id="eduWeight"></span>
+                                </div>
+                            </div>
+
+                            <div
+                                class="flex items-center justify-between bg-gray-50 rounded-lg p-2 border border-gray-200">
+                                <div class="flex items-center">
+                                    <i class="fas fa-briefcase text-green-400 mr-2" style="font-size: 10px;"></i>
+                                    <span class="text-xs font-medium text-gray-700">Experience</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-12 bg-gray-200 rounded-full h-1.5 mr-1">
+                                        <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-1.5 rounded-full transition-all duration-500"
+                                            id="expBar" style="width: 0%"></div>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-900 w-7 text-right" id="expWeight"></span>
+                                </div>
+                            </div>
+
+                            <div
+                                class="flex items-center justify-between bg-gray-50 rounded-lg p-2 border border-gray-200">
+                                <div class="flex items-center">
+                                    <i class="fas fa-project-diagram text-purple-400 mr-2" style="font-size: 10px;"></i>
+                                    <span class="text-xs font-medium text-gray-700">Projects</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-12 bg-gray-200 rounded-full h-1.5 mr-1">
+                                        <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-1.5 rounded-full transition-all duration-500"
+                                            id="projBar" style="width: 0%"></div>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-900 w-7 text-right" id="projWeight"></span>
+                                </div>
+                            </div>
+
+                            <div
+                                class="flex items-center justify-between bg-gray-50 rounded-lg p-2 border border-gray-200">
+                                <div class="flex items-center">
+                                    <i class="fas fa-certificate text-amber-400 mr-2" style="font-size: 10px;"></i>
+                                    <span class="text-xs font-medium text-gray-700">Certifications</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-12 bg-gray-200 rounded-full h-1.5 mr-1">
+                                        <div class="bg-gradient-to-r from-amber-500 to-orange-500 h-1.5 rounded-full transition-all duration-500"
+                                            id="certBar" style="width: 0%"></div>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-900 w-7 text-right" id="certWeight"></span>
+                                </div>
+                            </div>
+
+                            <div
+                                class="flex items-center justify-between bg-gray-50 rounded-lg p-2 border border-gray-200">
+                                <div class="flex items-center">
+                                    <i class="fas fa-star text-blue-400 mr-2" style="font-size: 10px;"></i>
+                                    <span class="text-xs font-medium text-gray-700">Required Skills</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-12 bg-gray-200 rounded-full h-1.5 mr-1">
+                                        <div class="bg-gradient-to-r from-indigo-500 to-blue-500 h-1.5 rounded-full transition-all duration-500"
+                                            id="reqSkillBar" style="width: 0%"></div>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-900 w-7 text-right"
+                                        id="reqSkillWeight"></span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between bg-gray-50 rounded-lg p-2 border border-gray-200"
+                                id="optionalSkillsWeightCompact">
+                                <div class="flex items-center">
+                                    <i class="fas fa-thumbs-up text-teal-400 mr-2" style="font-size: 10px;"></i>
+                                    <span class="text-xs font-medium text-gray-700">Optional Skills</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-12 bg-gray-200 rounded-full h-1.5 mr-1">
+                                        <div class="bg-gradient-to-r from-teal-500 to-green-500 h-1.5 rounded-full transition-all duration-500"
+                                            id="optSkillBar" style="width: 0%"></div>
+                                    </div>
+                                    <span class="text-xs font-bold text-gray-900 w-7 text-right"
+                                        id="optSkillWeight"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compact Footer -->
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-t border-gray-200 flex-shrink-0">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2 text-xs text-gray-600">
+                            <i class="fas fa-shield-alt text-blue-500"></i>
+                            <span>AI scoring enabled on posting</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="closeConfirmationModal()"
+                                class="modal-button px-3 py-1.5 bg-white hover:bg-gray-50 text-gray-700 rounded-lg border border-gray-300 transition-all duration-200 flex items-center space-x-1 text-xs shadow-sm hover:shadow">
+                                <i class="fas fa-arrow-left"></i>
+                                <span>Edit</span>
+                            </button>
+                            <button onclick="confirmSubmission()"
+                                class="modal-button px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg transition-all duration-200 flex items-center space-x-1 text-xs font-medium shadow-sm hover:shadow">
+                                <i class="fas fa-rocket"></i>
+                                <span>Post Vacancy</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-lg">
+                        <i class="fas fa-briefcase text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Recruiter Dashboard</h1>
+                        <p class="text-sm text-gray-500">Private vacancy management system</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="theme-toggle"
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-all duration-300">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                    <button
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Privacy Settings</span>
+                    </button>
+                    <button
+                        class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center space-x-2">
+                        <i class="fas fa-download"></i>
+                        <span>Export Report</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Back Button -->
+        <div class="mb-6">
+            <button onclick="goBack()"
+                class="inline-flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors duration-200">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Vacancies</span>
+            </button>
+        </div>
+
+        <!-- Page Header -->
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Add New Vacancy</h2>
+            <p class="text-gray-600 text-lg">Create a new job vacancy for candidates to apply</p>
+        </div>
+
+        <!-- Recruiter Info Box -->
+        <div class="info-box">
+            <div class="info-box-title">
+                <i class="fas fa-info-circle"></i>
+                <span>AI-Powered Candidate Scoring</span>
+            </div>
+            <div class="info-box-content">
+                This vacancy will use AI to automatically score candidates based on evaluation criteria weights you
+                set below. The AI analyzes resumes, portfolios, and responses to calculate match scores, helping you
+                identify most qualified candidates faster.
+            </div>
+        </div>
+
+        <!-- Add Vacancy Form -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <form id="vacancyForm" class="space-y-4">
+                <!-- Job Position -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Job Position *
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">The official job title that will appear to candidates and in job
+                                postings</span>
+                        </span>
+                    </label>
+                    <input type="text" id="job_position" name="job_position"
+                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="e.g. Senior Software Engineer" value="Senior Software Engineer" required>
+                </div>
+
+                <!-- Job Description -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Job Description *
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">Detailed description of role, responsibilities, and what the
+                                candidate will be doing</span>
+                        </span>
+                    </label>
+                    <textarea id="job_description" name="job_description" rows="4"
+                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Provide a comprehensive overview of position..."
+                        required>We are looking for a talented Senior Software Engineer to join our growing team. You will be responsible for developing high-quality software solutions, collaborating with cross-functional teams, and contributing to technical direction of our products. The ideal candidate has strong problem-solving skills, experience with modern development practices, and a passion for creating exceptional user experiences.</textarea>
+                </div>
+
+                <!-- Department -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Department *
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">The department title that will appear to candidates and in job
+                                postings</span>
+                        </span>
+                    </label>
+                    <input type="text" id="department" name="department"
+                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="e.g. Engineering" value="Engineering" required>
+                </div>
+
+                <!-- Key Responsibilities -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Key Responsibilities *
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">Main duties and tasks candidate will perform. AI uses these to
+                                match candidate experience</span>
+                        </span>
+                    </label>
+                    <div id="responsibilitiesContainer" class="bullet-input-container">
+                        <input type="text" id="responsibilitiesInput" class="bullet-input-field"
+                            placeholder="Enter key responsibilities">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Press Enter or comma to add responsibility</p>
+                    <div id="responsibilitiesPreview" class="mt-2"></div>
+                    <input type="hidden" id="responsibilities" name="responsibilities" value="">
+                </div>
+
+                <!-- Education Requirements -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Education Requirements (Optional)
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">Required degree, field of study, or educational qualifications</span>
+                        </span>
+                    </label>
+                    <input type="text" id="education_requirements" name="education_requirements"
+                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="e.g. Bachelor's degree in Computer Science"
+                        value="Bachelor's degree in Computer Science or related field">
+                </div>
+
+                <!-- Certification Requirements -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Certification Requirements (Optional)
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">Professional certifications that would be beneficial for this
+                                role</span>
+                        </span>
+                    </label>
+                    <div id="certificationsContainer" class="tag-input-container">
+                        <input type="text" id="certificationsInput" class="tag-input-field"
+                            placeholder="Enter required certifications">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Press Enter or comma to add certification</p>
+                    <div id="certificationsPreview" class="mt-2 flex flex-wrap"></div>
+                    <input type="hidden" id="certification_requirements" name="certification_requirements" value="">
+                </div>
+
+                <!-- Required Skills -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Required Skills *
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">Essential technical and soft skills candidates must have. AI heavily
+                                weights these in scoring</span>
+                        </span>
+                    </label>
+                    <div id="requiredSkillsContainer" class="tag-input-container">
+                        <input type="text" id="requiredSkillsInput" class="tag-input-field"
+                            placeholder="Enter required skills">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Press Enter or comma to add skill</p>
+                    <div id="requiredSkillsPreview" class="mt-2 flex flex-wrap"></div>
+                    <input type="hidden" id="required_skills" name="required_skills" value="">
+                </div>
+
+                <!-- Nice-to-Have Skills -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Nice-to-Have Skills (Optional)
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">Additional skills that would make a candidate stand out but aren't
+                                required</span>
+                        </span>
+                    </label>
+                    <div id="niceToHaveContainer" class="tag-input-container">
+                        <input type="text" id="niceToHaveInput" class="tag-input-field"
+                            placeholder="Enter nice-to-have skills">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Press Enter or comma to add skill</p>
+                    <div id="niceToHavePreview" class="mt-2 flex flex-wrap"></div>
+                    <input type="hidden" id="optional_skills" name="optional_skills" value="">
+                </div>
+
+                <!-- Experience Level -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Experience Level *
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">Expected career level of ideal candidate</span>
+                        </span>
+                    </label>
+                    <select id="experience_level" name="experience_level"
+                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Select experience level</option>
+                        <option value="Entry Level">Entry Level (0-2 years)</option>
+                        <option value="Junior">Junior (2-4 years)</option>
+                        <option value="Mid-Level">Mid-Level (4-7 years)</option>
+                        <option value="Senior">Senior (7-10 years)</option>
+                        <option value="Lead">Lead (10+ years)</option>
+                        <option value="Principal">Principal (15+ years)</option>
+                    </select>
+                </div>
+
+                <!-- Minimum Years -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Minimum Years of Experience
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">Specific minimum years of relevant experience. Leave flexible if open
+                                to exceptional candidates</span>
+                        </span>
+                    </label>
+                    <input type="number" id="min_years_experience" name="min_years_experience" min="0" max="30"
+                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter minimum years (optional)" value="7">
+                </div>
+
+                <!-- Location -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Location *
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">Where candidate will work. Include city, state, or specify
+                                remote</span>
+                        </span>
+                    </label>
+                    <input type="text" id="job_location" name="job_location"
+                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="e.g. San Francisco, CA or Remote" value="Remote" required>
+                </div>
+
+                <!-- Work Type -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Work Type *
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">How the candidate will work - in office, remotely, or a
+                                combination</span>
+                        </span>
+                    </label>
+                    <select id="work_type" name="work_type"
+                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Select work type</option>
+                        <option value="On-site">On-site (Work from office)</option>
+                        <option value="Remote">Remote (Work from anywhere)</option>
+                        <option value="Hybrid">Hybrid (Mix of office and remote)</option>
+                    </select>
+                </div>
+
+                <!-- Evaluation Criteria Weights -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Evaluation Criteria Weights *
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">Set how AI scores candidates. Total must equal 100%. Higher weight =
+                                more important in evaluation</span>
+                        </span>
+                    </label>
+
+                    <div class="info-box"
+                        style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-color: #bbf7d0;">
+                        <div class="info-box-title" style="color: #166534;">
+                            <i class="fas fa-robot"></i>
+                            <span>How AI Scoring Works</span>
+                        </div>
+                        <div class="info-box-content" style="color: #166534;">
+                            The AI will automatically evaluate each candidate based on these weighted criteria:
+                            <ul class="mt-2 ml-4 list-disc space-y-1">
+                                <li><strong>Education:</strong> Validates degrees, institutions, and relevance</li>
+                                <li><strong>Experience:</strong> Analyzes years, companies, and role progression</li>
+                                <li><strong>Projects:</strong> Evaluates portfolio quality, complexity, and relevance
+                                </li>
+                                <li><strong>Certifications:</strong> Verifies authenticity and relevance to role</li>
+                                <li><strong>Skills:</strong> Matches required skills through resume analysis and
+                                    assessments</li>
+                            </ul>
+                            <p class="mt-2">Candidates receive a score (0-100) and are automatically ranked. Adjust
+                                weights based on what matters most for this specific role.</p>
+                        </div>
+                    </div>
+
+                    <div class="weight-container">
+                        <div class="weight-grid">
+                            <div class="weight-input-group">
+                                <div class="weight-label">Education</div>
+                                <div class="weight-input-wrapper">
+                                    <input type="number" id="educationWeight" class="weight-input" min="0" max="100"
+                                        value="15">
+                                    <span class="weight-suffix">%</span>
+                                </div>
+                            </div>
+
+                            <div class="weight-input-group">
+                                <div class="weight-label">Experience</div>
+                                <div class="weight-input-wrapper">
+                                    <input type="number" id="experienceWeight" class="weight-input" min="0" max="100"
+                                        value="25">
+                                    <span class="weight-suffix">%</span>
+                                </div>
+                            </div>
+
+                            <div class="weight-input-group">
+                                <div class="weight-label">Projects</div>
+                                <div class="weight-input-wrapper">
+                                    <input type="number" id="projectsWeight" class="weight-input" min="0" max="100"
+                                        value="20">
+                                    <span class="weight-suffix">%</span>
+                                </div>
+                            </div>
+
+                            <div class="weight-input-group">
+                                <div class="weight-label">Certifications</div>
+                                <div class="weight-input-wrapper">
+                                    <input type="number" id="certificationsWeight" class="weight-input" min="0"
+                                        max="100" value="10">
+                                    <span class="weight-suffix">%</span>
+                                </div>
+                            </div>
+
+                            <div class="weight-input-group">
+                                <div class="weight-label">Required Skills</div>
+                                <div class="weight-input-wrapper">
+                                    <input type="number" id="requiredSkillsWeight" class="weight-input" min="0"
+                                        max="100" value="30">
+                                    <span class="weight-suffix">%</span>
+                                </div>
+                            </div>
+
+                            <div class="weight-input-group" id="optionalSkillsWeightGroup" style="display: none;">
+                                <div class="weight-label">Optional Skills</div>
+                                <div class="weight-input-wrapper">
+                                    <input type="number" id="optionalSkillsWeight" class="weight-input" min="0"
+                                        max="100" value="0">
+                                    <span class="weight-suffix">%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="weight-footer">
+                            <div class="weight-total">
+                                <span>Total:</span>
+                                <div class="weight-total-value valid" id="totalWeight">100%</div>
+                            </div>
+                            <div class="weight-presets">
+                                <button type="button" class="weight-preset"
+                                    onclick="setWeightPreset('balanced')">Balanced</button>
+                                <button type="button" class="weight-preset"
+                                    onclick="setWeightPreset('skills-focused')">Skills</button>
+                                <button type="button" class="weight-preset"
+                                    onclick="setWeightPreset('experience-focused')">Experience</button>
+                                <button type="button" class="weight-preset"
+                                    onclick="setWeightPreset('education-focused')">Education</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="recruiter-note">
+                        <i class="fas fa-lightbulb mt-0.5"></i>
+                        <div>
+                            <strong>Pro Tip:</strong> For technical roles, increase Skills weight. For leadership
+                            positions, increase Experience weight. For academic/research roles, increase Education
+                            weight.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Salary Range -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Salary Range (USD) *
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">Annual compensation range. Be competitive to attract qualified
+                                candidates</span>
+                        </span>
+                    </label>
+                    <div id="salaryRangeContainer" class="salary-range-container">
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <div class="salary-input-group">
+                                <span class="salary-icon">$</span>
+                                <input type="number" id="salary_min" name="salary_min" min="0"
+                                    class="salary-input w-full px-3 py-2 pl-7 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Min">
+                            </div>
+                            <div class="salary-input-group">
+                                <span class="salary-icon">$</span>
+                                <input type="number" id="salary_max" name="salary_max" min="0"
+                                    class="salary-input w-full px-3 py-2 pl-7 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Max">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="dual-slider-container">
+                                <div class="slider-track"></div>
+                                <div class="slider-range" id="sliderRange"></div>
+                                <input type="range" id="minSlider" class="salary-slider" min="0" max="500000"
+                                    step="1000" value="30000">
+                                <input type="range" id="maxSlider" class="salary-slider" min="0" max="500000"
+                                    step="1000" value="80000">
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500">
+                                <span>$0</span>
+                                <span id="rangeDisplay" class="font-medium text-blue-600">$30,000 - $80,000</span>
+                                <span>$500,000+</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="salary-presets">
+                                <button type="button" class="salary-preset"
+                                    onclick="setSalaryRange(30000, 50000)">$30k-$50k</button>
+                                <button type="button" class="salary-preset"
+                                    onclick="setSalaryRange(50000, 75000)">$50k-$75k</button>
+                                <button type="button" class="salary-preset"
+                                    onclick="setSalaryRange(75000, 100000)">$75k-$100k</button>
+                                <button type="button" class="salary-preset"
+                                    onclick="setSalaryRange(100000, 150000)">$100k-$150k</button>
+                                <button type="button" class="salary-preset"
+                                    onclick="setSalaryRange(150000, 200000)">$150k-$200k</button>
+                                <button type="button" class="salary-preset"
+                                    onclick="setSalaryRange(200000, 300000)">$200k-$300k</button>
+                                <button type="button" class="salary-preset"
+                                    onclick="setSalaryRange(300000, 400000)">$300k-$400k</button>
+                                <button type="button" class="salary-preset"
+                                    onclick="setSalaryRange(400000, 500000)">$400k-$500k</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="recruiter-note">
+                        <i class="fas fa-chart-line mt-0.5"></i>
+                        <div>
+                            <strong>Market Insight:</strong> Research similar positions in your location. Consider
+                            experience level, company size, and industry standards when setting salary ranges.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application Deadline -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Application Deadline *
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">When applications will close. Set a reasonable timeframe to receive
+                                quality applications</span>
+                        </span>
+                    </label>
+                    <input type="text" id="application_deadline" name="application_deadline"
+                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Select application deadline" value="2025-12-31" required>
+                </div>
+
+                <!-- Max Applicants -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Max Applicants
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">Limit number of applications to manage volume. Helps focus on
+                                quality over quantity</span>
+                        </span>
+                    </label>
+                    <input type="number" id="max_applicants" name="max_applicants" min="1"
+                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter maximum number of applicants" value="100">
+                    <p class="text-xs text-gray-500 mt-1">Leave empty to have no limit on number of applicants</p>
+
+                    <div class="recruiter-note">
+                        <i class="fas fa-users mt-0.5"></i>
+                        <div>
+                            <strong>Recommendation:</strong> For popular positions, consider setting a limit (50-100) to
+                            ensure you can properly review each application. Use AI scoring to prioritize the most
+                            qualified candidates.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Status
+                        <span class="tooltip-container">
+                            <i class="fas fa-question-circle tooltip-icon"></i>
+                            <span class="tooltip">Current status of vacancy posting</span>
+                        </span>
+                    </label>
+                    <select id="status" name="status"
+                        class="form-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="active" selected>Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="closed">Closed</option>
+                        <option value="draft">Draft</option>
+                    </select>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end">
+                    <button type="button" onclick="resetForm()"
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:shadow-md transition-all duration-300 flex items-center space-x-2 mr-3">
+                        <i class="fas fa-times"></i>
+                        <span>Cancel</span>
+                    </button>
+                    <button type="button" id="postVacancyBtn" onclick="attemptSubmit()"
+                        class="btn-primary bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-lg flex items-center space-x-2"
+                        disabled>
+                        <i class="fas fa-save mr-2"></i>
+                        <span>Post Vacancy</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast"
+            class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-full transition-transform duration-300 flex items-center space-x-2">
+            <i class="fas fa-check-circle"></i>
+            <span id="toastMessage">Vacancy posted successfully!</span>
+        </div>
+    </main>
+
+    <script>
+        // Store arrays for all tag inputs
+        let requiredSkills = [];
+        let niceToHaveSkills = [];
+        let responsibilities = [];
+        let certifications = [];
+
+        // Initialize tag inputs
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Set default values for tag inputs
+            const defaultResponsibilities = [
+                "Design and develop high-quality software solutions",
+                "Collaborate with cross-functional teams",
+                "Write clean, maintainable code",
+                "Participate in code reviews"
+            ];
+
+            const defaultRequiredSkills = [
+                "JavaScript",
+                "React",
+                "Node.js",
+                "Problem Solving"
+            ];
+
+            const defaultNiceToHaveSkills = [
+                "TypeScript",
+                "AWS",
+                "Docker",
+                "GraphQL"
+            ];
+
+            const defaultCertifications = [
+                "AWS Certified Developer",
+                "Google Cloud Professional"
+            ];
+
+            // Add default responsibilities
+            defaultResponsibilities.forEach(resp => {
+                responsibilities.push(resp);
+            });
+            updateResponsibilitiesPreview();
+
+            // Add default required skills
+            defaultRequiredSkills.forEach(skill => {
+                requiredSkills.push(skill);
+                updatePreview('requiredSkills', requiredSkills, 'required-skills');
+            });
+
+            // Add default nice-to-have skills
+            defaultNiceToHaveSkills.forEach(skill => {
+                niceToHaveSkills.push(skill);
+                updatePreview('niceToHave', niceToHaveSkills, 'nice-to-have');
+            });
+
+            // Show optional skills weight field since we have nice-to-have skills
+            document.getElementById('optionalSkillsWeightGroup').style.display = 'flex';
+
+            // Add default certifications
+            defaultCertifications.forEach(cert => {
+                certifications.push(cert);
+                updatePreview('certifications', certifications, 'certifications');
+            });
+
+            // Initialize date picker
+            flatpickr("#application_deadline", {
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                locale: {
+                    firstDayOfWeek: 1
+                },
+                onChange: function () {
+                    validateForm();
+                }
+            });
+
+            // Set default salary range
+            setSalaryRange(90000, 130000);
+
+            // Required skills
+            const requiredInput = document.getElementById('requiredSkillsInput');
+            requiredInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    const skill = this.value.trim();
+                    if (skill && !requiredSkills.includes(skill)) {
+                        addRequiredSkill(skill);
+                        this.value = '';
+                    }
+                }
+            });
+
+            // Nice to have skills
+            const niceToHaveInput = document.getElementById('niceToHaveInput');
+            niceToHaveInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    const skill = this.value.trim();
+                    if (skill && !niceToHaveSkills.includes(skill)) {
+                        addNiceToHaveSkill(skill);
+                        this.value = '';
+                        // Show optional skills weight field if any nice-to-have skills are added
+                        document.getElementById('optionalSkillsWeightGroup').style.display = 'flex';
+                        updateTotalWeight();
+                    }
+                }
+            });
+
+            // Responsibilities
+            const responsibilitiesInput = document.getElementById('responsibilitiesInput');
+            responsibilitiesInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    const responsibility = this.value.trim();
+                    if (responsibility && !responsibilities.includes(responsibility)) {
+                        addResponsibility(responsibility);
+                        this.value = '';
+                    }
+                }
+            });
+
+            // Certifications
+            const certificationsInput = document.getElementById('certificationsInput');
+            certificationsInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ',') {
+                    e.preventDefault();
+                    const certification = this.value.trim();
+                    if (certification && !certifications.includes(certification)) {
+                        addCertification(certification);
+                        this.value = '';
+                    }
+                }
+            });
+
+            // Prevent form submission on Enter in all tag inputs
+            [requiredInput, niceToHaveInput, responsibilitiesInput, certificationsInput].forEach(input => {
+                input.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                    }
+                });
+            });
+
+            // Initialize dual sliders
+            const minSlider = document.getElementById('minSlider');
+            const maxSlider = document.getElementById('maxSlider');
+            const minSalaryInput = document.getElementById('salary_min');
+            const maxSalaryInput = document.getElementById('salary_max');
+            const sliderRange = document.getElementById('sliderRange');
+            const rangeDisplay = document.getElementById('rangeDisplay');
+
+            function updateSliderRange() {
+                const minVal = parseInt(minSlider.value);
+                const maxVal = parseInt(maxSlider.value);
+
+                // Ensure min doesn't exceed max
+                if (minVal > maxVal - 5000) {
+                    minSlider.value = maxVal - 5000;
+                }
+
+                // Update input fields
+                minSalaryInput.value = minSlider.value;
+                maxSalaryInput.value = maxSlider.value;
+
+                // Update range display
+                rangeDisplay.textContent = `$${parseInt(minSlider.value).toLocaleString()} - $${parseInt(maxSlider.value).toLocaleString()}`;
+
+                // Update visual range
+                const minPercent = (minSlider.value / 500000) * 100;
+                const maxPercent = (maxSlider.value / 500000) * 100;
+                sliderRange.style.left = `${minPercent}%`;
+                sliderRange.style.width = `${maxPercent - minPercent}%`;
+
+                validateForm();
+            }
+
+            minSlider.addEventListener('input', updateSliderRange);
+            maxSlider.addEventListener('input', updateSliderRange);
+
+            // Sync input fields with sliders
+            minSalaryInput.addEventListener('input', function () {
+                minSlider.value = this.value || 0;
+                updateSliderRange();
+            });
+
+            maxSalaryInput.addEventListener('input', function () {
+                maxSlider.value = this.value || 0;
+                updateSliderRange();
+            });
+
+            // Add event listeners for all required fields
+            const requiredFields = [
+                'job_position', 'job_description', 'department', 'experience_level',
+                'job_location', 'work_type', 'application_deadline'
+            ];
+
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                field.addEventListener('input', validateForm);
+                field.addEventListener('change', validateForm);
+            });
+
+            // Add event listeners for weight inputs
+            const weightInputs = [
+                'educationWeight', 'experienceWeight', 'projectsWeight',
+                'certificationsWeight', 'requiredSkillsWeight', 'optionalSkillsWeight'
+            ];
+
+            weightInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                input.addEventListener('input', updateTotalWeight);
+            });
+
+            // Initial update
+            updateSliderRange();
+            updateTotalWeight();
+            validateForm();
+        });
+
+        // Function to attempt submit with validation
+        function attemptSubmit() {
+            if (validateFormForSubmit()) {
+                showConfirmationModal();
+            } else {
+                // Scroll to first error field
+                const firstError = document.querySelector('.form-input.error, .tag-input-container.error, .bullet-input-container.error');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+                showToast('Please fill in all required fields correctly', 'error');
+            }
+        }
+
+        // Separate validation function for submit
+        function validateFormForSubmit() {
+            const jobPosition = document.getElementById('job_position').value.trim();
+            const jobDescription = document.getElementById('job_description').value.trim();
+            const department = document.getElementById('department').value.trim();
+            const experienceLevel = document.getElementById('experience_level').value;
+            const location = document.getElementById('job_location').value.trim();
+            const workType = document.getElementById('work_type').value;
+            const minSalary = document.getElementById('salary_min').value;
+            const maxSalary = document.getElementById('salary_max').value;
+            const deadline = document.getElementById('application_deadline').value;
+
+            // Check if total weight is 100%
+            const totalWeight = parseInt(document.getElementById('totalWeight').textContent) || 0;
+
+            // Check all required fields
+            const isValid =
+                jobPosition !== '' &&
+                jobDescription !== '' &&
+                department !== '' &&
+                requiredSkills.length > 0 &&
+                responsibilities.length > 0 &&
+                experienceLevel !== '' &&
+                location !== '' &&
+                workType !== '' &&
+                minSalary !== '' &&
+                maxSalary !== '' &&
+                deadline !== '' &&
+                totalWeight === 100;
+
+            return isValid;
+        }
+
+        function showConfirmationModal() {
+            // Populate job details
+            document.getElementById('confirmPosition').textContent = document.getElementById('job_position').value;
+            document.getElementById('confirmDepartment').textContent = document.getElementById('department').value;
+            document.getElementById('confirmExperienceLevel').textContent = document.getElementById('experience_level').value;
+            document.getElementById('confirmWorkType').textContent = document.getElementById('work_type').value;
+            document.getElementById('confirmLocation').textContent = document.getElementById('job_location').value;
+            document.getElementById('confirmDeadline').textContent = document.getElementById('application_deadline').value;
+            document.getElementById('confirmMaxApplicants').textContent = document.getElementById('max_applicants').value || 'No limit';
+
+            // Populate salary range
+            const minSalary = parseInt(document.getElementById('salary_min').value);
+            const maxSalary = parseInt(document.getElementById('salary_max').value);
+            document.getElementById('confirmSalary').textContent = `$${(minSalary / 1000).toFixed(0)}k-${(maxSalary / 1000).toFixed(0)}k`;
+
+            // Status badge
+            const status = document.getElementById('status').value;
+            const statusBadge = document.getElementById('confirmStatusBadge');
+            statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            statusBadge.className = `inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium status-${status}`;
+
+            // Education
+            document.getElementById('confirmEducation').textContent = document.getElementById('education_requirements').value || 'Not specified';
+
+            // Skills and requirements with elegant badges
+            const createSkillBadges = (items, type) => {
+                if (items.length === 0) return '<span class="text-gray-400 text-xs italic">None specified</span>';
+                return items.map(item =>
+                    `<span class="skill-badge ${type}">${item}</span>`
+                ).join('');
+            };
+
+            document.getElementById('confirmRequiredSkills').innerHTML = createSkillBadges(requiredSkills, 'required');
+            document.getElementById('confirmNiceToHaveSkills').innerHTML = createSkillBadges(niceToHaveSkills, 'optional');
+            document.getElementById('confirmResponsibilities').innerHTML = createSkillBadges(responsibilities, 'responsibility');
+            document.getElementById('confirmCertifications').innerHTML = createSkillBadges(certifications, 'certification');
+
+            // ALL 6 WEIGHTS with elegant display
+            const eduWeight = parseInt(document.getElementById('educationWeight').value);
+            const expWeight = parseInt(document.getElementById('experienceWeight').value);
+            const projWeight = parseInt(document.getElementById('projectsWeight').value);
+            const certWeight = parseInt(document.getElementById('certificationsWeight').value);
+            const reqSkillWeight = parseInt(document.getElementById('requiredSkillsWeight').value);
+            const optSkillWeight = parseInt(document.getElementById('optionalSkillsWeight').value);
+
+            // Update weight values
+            document.getElementById('eduWeight').textContent = eduWeight + '%';
+            document.getElementById('expWeight').textContent = expWeight + '%';
+            document.getElementById('projWeight').textContent = projWeight + '%';
+            document.getElementById('certWeight').textContent = certWeight + '%';
+            document.getElementById('reqSkillWeight').textContent = reqSkillWeight + '%';
+            document.getElementById('optSkillWeight').textContent = optSkillWeight + '%';
+
+            // Update total
+            const total = eduWeight + expWeight + projWeight + certWeight + reqSkillWeight + optSkillWeight;
+            document.getElementById('totalWeightDisplay').textContent = total + '%';
+
+            // Show/hide optional skills
+            const optionalSkillsWeightCompact = document.getElementById('optionalSkillsWeightCompact');
+            if (optSkillWeight > 0) {
+                optionalSkillsWeightCompact.style.display = 'flex';
+            } else {
+                optionalSkillsWeightCompact.style.display = 'none';
+            }
+
+            // Job Description
+            document.getElementById('confirmDescription').textContent = document.getElementById('job_description').value;
+
+            // Show modal with animation
+            const modal = document.getElementById('confirmationModal');
+            const modalContent = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100', 'modal-enter');
+
+                // Animate all 6 weight bars
+                setTimeout(() => {
+                    document.getElementById('eduBar').style.width = eduWeight + '%';
+                    document.getElementById('expBar').style.width = expWeight + '%';
+                    document.getElementById('projBar').style.width = projWeight + '%';
+                    document.getElementById('certBar').style.width = certWeight + '%';
+                    document.getElementById('reqSkillBar').style.width = reqSkillWeight + '%';
+                    document.getElementById('optSkillBar').style.width = optSkillWeight + '%';
+                }, 100);
+            }, 10);
+        }
+
+        function closeConfirmationModal() {
+            const modal = document.getElementById('confirmationModal');
+            const modalContent = document.getElementById('modalContent');
+
+            modalContent.classList.add('modal-exit');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modalContent.classList.remove('modal-enter', 'modal-exit', 'scale-100', 'opacity-100');
+                modalContent.classList.add('scale-95', 'opacity-0');
+
+                // Reset all 6 weight bars
+                document.getElementById('eduBar').style.width = '0%';
+                document.getElementById('expBar').style.width = '0%';
+                document.getElementById('projBar').style.width = '0%';
+                document.getElementById('certBar').style.width = '0%';
+                document.getElementById('reqSkillBar').style.width = '0%';
+                document.getElementById('optSkillBar').style.width = '0%';
+            }, 250);
+        }
+
+        function confirmSubmission() {
+            closeConfirmationModal();
+
+            // Show loading overlay
+            document.getElementById('loadingOverlay').classList.add('active');
+
+            const vacancyData = {
+                job_position: document.getElementById('job_position').value,
+                job_description: document.getElementById('job_description').value,
+                department: document.getElementById('department').value,
+                responsibilities: responsibilities,
+                education_requirements: document.getElementById('education_requirements').value || null,
+                certification_requirements: certifications.length ? certifications : null,
+                required_skills: requiredSkills,
+                optional_skills: niceToHaveSkills.length ? niceToHaveSkills : null,
+                experience_level: document.getElementById('experience_level').value,
+                min_years_experience: document.getElementById('min_years_experience').value ? parseInt(document.getElementById('min_years_experience').value) : null,
+                job_location: document.getElementById('job_location').value,
+                work_type: document.getElementById('work_type').value,
+                salary_min: parseInt(document.getElementById('salary_min').value),
+                salary_max: parseInt(document.getElementById('salary_max').value),
+                application_deadline: document.getElementById('application_deadline').value,
+                max_applicants: document.getElementById('max_applicants').value ? parseInt(document.getElementById('max_applicants').value) : null,
+                status: document.getElementById('status').value
+            };
+
+            console.log("--- Step 1: Vacancy Data Ready ---");
+            console.log(JSON.stringify(vacancyData, null, 2));
+
+            fetch('http://localhost:8000/vacancies/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(vacancyData)
+            })
+                .then(response => {
+                    console.log("--- Step 2: Response from /vacancies/ accepted ---");
+                    console.log("Status:", response.status, response.statusText);
+
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            console.error("--- Failed in /vacancies/ ---");
+                            console.error(JSON.stringify(errorData, null, 2));
+                            throw new Error(`Failed load vacancy: ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(vacancyResponse => {
+                    console.log("--- Step 3: Vacancy Successfully Loaded ---");
+                    console.log("Response:", vacancyResponse);
+
+                    const vacancyId = vacancyResponse.id;
+
+                    const weightsData = {
+                        vacancy_id: vacancyId,
+                        education_weight: parseInt(document.getElementById('educationWeight').value),
+                        experience_weight: parseInt(document.getElementById('experienceWeight').value),
+                        projects_weight: parseInt(document.getElementById('projectsWeight').value),
+                        certifications_weight: parseInt(document.getElementById('certificationsWeight').value),
+                        required_skills_weight: parseInt(document.getElementById('requiredSkillsWeight').value),
+                        optional_skills_weight: parseInt(document.getElementById('optionalSkillsWeight').value)
+                    };
+
+                    console.log("--- Step 4: Weights Data Ready ---");
+                    console.log(JSON.stringify(weightsData, null, 2));
+
+                    return fetch('http://localhost:8000/vacancies/vacancy-weights/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(weightsData)
+                    });
+                })
+                .then(weightsResponse => {
+                    console.log("--- Step 5: Response from /vacancy-weights/ accepted ---");
+                    console.log("Status:", weightsResponse.status, weightsResponse.statusText);
+
+                    if (!weightsResponse.ok) {
+                        return weightsResponse.json().then(errorData => {
+                            console.error("--- Failed in /vacancy-weights/ ---");
+                            console.error(JSON.stringify(errorData, null, 2));
+                            throw new Error(`Failed saving weights: ${weightsResponse.status}`);
+                        });
+                    }
+                    return weightsResponse.json();
+                })
+                .then(finalData => {
+                    console.log("--- Step 6: All proccess success ---");
+                    console.log("Final Response:", finalData);
+                    document.getElementById('loadingOverlay').classList.remove('active');
+                    showToast('Vacancy posted successfully! AI scoring is now active.');
+                    resetForm();
+                    setTimeout(() => {
+                        window.location.href = `/vacancies/${vacancyId}`;
+                    }, 2000);
+                })
+                .catch(error => {
+                    console.error("--- ERROR AKHIR ---");
+                    console.error(error.message);
+                    document.getElementById('loadingOverlay').classList.remove('active');
+                    showToast(error.message || 'Terjadi kesalahan tak terduga.', 'error');
+                });
+        }
+
+        function updateTotalWeight() {
+            const educationWeight = parseInt(document.getElementById('educationWeight').value) || 0;
+            const experienceWeight = parseInt(document.getElementById('experienceWeight').value) || 0;
+            const projectsWeight = parseInt(document.getElementById('projectsWeight').value) || 0;
+            const certificationsWeight = parseInt(document.getElementById('certificationsWeight').value) || 0;
+            const requiredSkillsWeight = parseInt(document.getElementById('requiredSkillsWeight').value) || 0;
+
+            // Check if optional skills field is visible
+            const optionalSkillsGroup = document.getElementById('optionalSkillsWeightGroup');
+            const optionalSkillsWeight = optionalSkillsGroup.style.display === 'flex' ?
+                parseInt(document.getElementById('optionalSkillsWeight').value) || 0 : 0;
+
+            const total = educationWeight + experienceWeight + projectsWeight +
+                certificationsWeight + requiredSkillsWeight + optionalSkillsWeight;
+
+            const totalWeightElement = document.getElementById('totalWeight');
+            totalWeightElement.textContent = total + '%';
+
+            // Update visual feedback
+            if (total === 100) {
+                totalWeightElement.classList.remove('invalid');
+                totalWeightElement.classList.add('valid');
+            } else {
+                totalWeightElement.classList.remove('valid');
+                totalWeightElement.classList.add('invalid');
+            }
+
+            // Update individual input validation
+            const weightInputs = document.querySelectorAll('.weight-input');
+            weightInputs.forEach(input => {
+                if (total !== 100) {
+                    input.classList.add('error');
+                } else {
+                    input.classList.remove('error');
+                }
+            });
+
+            validateForm();
+        }
+
+        // Set weight presets
+        function setWeightPreset(preset) {
+            const presets = {
+                'balanced': {
+                    education: 15,
+                    experience: 25,
+                    projects: 20,
+                    certifications: 10,
+                    requiredSkills: 30,
+                    optionalSkills: 0
+                },
+                'skills-focused': {
+                    education: 10,
+                    experience: 20,
+                    projects: 15,
+                    certifications: 5,
+                    requiredSkills: 50,
+                    optionalSkills: 0
+                },
+                'experience-focused': {
+                    education: 10,
+                    experience: 40,
+                    projects: 20,
+                    certifications: 5,
+                    requiredSkills: 25,
+                    optionalSkills: 0
+                },
+                'education-focused': {
+                    education: 35,
+                    experience: 20,
+                    projects: 15,
+                    certifications: 15,
+                    requiredSkills: 15,
+                    optionalSkills: 0
+                }
+            };
+
+            const selectedPreset = presets[preset];
+            if (selectedPreset) {
+                document.getElementById('educationWeight').value = selectedPreset.education;
+                document.getElementById('experienceWeight').value = selectedPreset.experience;
+                document.getElementById('projectsWeight').value = selectedPreset.projects;
+                document.getElementById('certificationsWeight').value = selectedPreset.certifications;
+                document.getElementById('requiredSkillsWeight').value = selectedPreset.requiredSkills;
+
+                // Check if optional skills field is visible
+                const optionalSkillsGroup = document.getElementById('optionalSkillsWeightGroup');
+                if (optionalSkillsGroup.style.display === 'flex') {
+                    document.getElementById('optionalSkillsWeight').value = selectedPreset.optionalSkills;
+                }
+
+                updateTotalWeight();
+            }
+        }
+
+        // Validate form and update button state
+        function validateForm() {
+            const jobPosition = document.getElementById('job_position').value.trim();
+            const jobDescription = document.getElementById('job_description').value.trim();
+            const department = document.getElementById('department').value.trim();
+            const experienceLevel = document.getElementById('experience_level').value;
+            const location = document.getElementById('job_location').value.trim();
+            const workType = document.getElementById('work_type').value;
+            const minSalary = document.getElementById('salary_min').value;
+            const maxSalary = document.getElementById('salary_max').value;
+            const deadline = document.getElementById('application_deadline').value;
+
+            // Check if total weight is 100%
+            const totalWeight = parseInt(document.getElementById('totalWeight').textContent) || 0;
+
+            const postBtn = document.getElementById('postVacancyBtn');
+
+            // Check all required fields
+            const isValid =
+                jobPosition !== '' &&
+                jobDescription !== '' &&
+                department !== '' &&
+                requiredSkills.length > 0 &&
+                responsibilities.length > 0 &&
+                experienceLevel !== '' &&
+                location !== '' &&
+                workType !== '' &&
+                minSalary !== '' &&
+                maxSalary !== '' &&
+                deadline !== '' &&
+                totalWeight === 100;
+
+            // Enable/disable button
+            postBtn.disabled = !isValid;
+
+            // Add/remove error states for salary range
+            const salaryContainer = document.getElementById('salaryRangeContainer');
+            if (minSalary === '' || maxSalary === '') {
+                salaryContainer.classList.add('error');
+            } else {
+                salaryContainer.classList.remove('error');
+            }
+
+            // Add/remove error states for responsibilities
+            const responsibilitiesContainer = document.getElementById('responsibilitiesContainer');
+            if (responsibilities.length === 0) {
+                responsibilitiesContainer.classList.add('error');
+            } else {
+                responsibilitiesContainer.classList.remove('error');
+            }
+        }
+
+        // Add functions for each tag type
+        function addRequiredSkill(skill) {
+            requiredSkills.push(skill);
+            document.getElementById('requiredSkillsContainer').classList.remove('error');
+            updatePreview('requiredSkills', requiredSkills, 'required-skills');
+            validateForm();
+        }
+
+        function addNiceToHaveSkill(skill) {
+            niceToHaveSkills.push(skill);
+            updatePreview('niceToHave', niceToHaveSkills, 'nice-to-have');
+        }
+
+        function addResponsibility(responsibility) {
+            responsibilities.push(responsibility);
+            document.getElementById('responsibilitiesContainer').classList.remove('error');
+            updateResponsibilitiesPreview();
+            validateForm();
+        }
+
+        function updateResponsibilitiesPreview() {
+            const previewContainer = document.getElementById('responsibilitiesPreview');
+            previewContainer.innerHTML = responsibilities.map((item, index) =>
+                `<div class="bullet-item">
+            <div class="bullet-item-number">${index + 1}</div>
+            <div class="bullet-item-text">${item}</div>
+            <button type="button" class="bullet-item-remove" onclick="removeResponsibility(${index})">
+                <i class="fas fa-times text-xs"></i>
+            </button>
+        </div>`
+            ).join('');
+        }
+
+        function addCertification(certification) {
+            certifications.push(certification);
+            updatePreview('certifications', certifications, 'certifications');
+        }
+
+        // Update preview for tags
+        function updatePreview(type, items, className) {
+            const previewContainer = document.getElementById(`${type}Preview`);
+            previewContainer.innerHTML = items.map(item =>
+                `<span class="preview-badge ${className}">
+            ${item}
+            <button type="button" onclick="removeTag('${item}', '${type}')">
+                <i class="fas fa-times text-xs"></i>
+            </button>
+        </span>`
+            ).join('');
+        }
+
+        // Remove tag
+        function removeResponsibility(index) {
+            responsibilities.splice(index, 1);
+            updateResponsibilitiesPreview();
+            validateForm();
+        }
+
+        function removeTag(text, type) {
+            const arrays = {
+                'required-skills': requiredSkills,
+                'nice-to-have': niceToHaveSkills,
+                'responsibilities': responsibilities,
+                'certifications': certifications
+            };
+
+            const previewTypes = {
+                'required-skills': 'requiredSkills',
+                'nice-to-have': 'niceToHave',
+                'responsibilities': 'responsibilities',
+                'certifications': 'certifications'
+            };
+
+            arrays[type] = arrays[type].filter(item => item !== text);
+            updatePreview(previewTypes[type], arrays[type], type);
+
+            // Hide optional skills weight field if no nice-to-have skills
+            if (type === 'nice-to-have' && niceToHaveSkills.length === 0) {
+                document.getElementById('optionalSkillsWeightGroup').style.display = 'none';
+                document.getElementById('optionalSkillsWeight').value = 0;
+                updateTotalWeight();
+            }
+
+            if (type === 'required-skills' || type === 'responsibilities') {
+                validateForm();
+            }
+        }
+
+        // Set salary range from preset
+        function setSalaryRange(min, max) {
+            document.getElementById('salary_min').value = min;
+            document.getElementById('salary_max').value = max;
+            document.getElementById('minSlider').value = min;
+            document.getElementById('maxSlider').value = max;
+
+            // Update slider visual
+            const sliderRange = document.getElementById('sliderRange');
+            const rangeDisplay = document.getElementById('rangeDisplay');
+            const minPercent = (min / 500000) * 100;
+            const maxPercent = (max / 500000) * 100;
+            sliderRange.style.left = `${minPercent}%`;
+            sliderRange.style.width = `${maxPercent - minPercent}%`;
+            rangeDisplay.textContent = `$${min.toLocaleString()} - $${max.toLocaleString()}`;
+
+            validateForm();
+        }
+
+        // Go back function
+        function goBack() {
+            window.location.href = '/vacancies';
+        }
+
+        // Reset form function
+        function resetForm() {
+            const form = document.getElementById('vacancyForm');
+            form.reset();
+
+            // Clear all arrays
+            requiredSkills = [];
+            niceToHaveSkills = [];
+            responsibilities = [];
+            certifications = [];
+
+            // Clear all previews
+            const previewContainers = [
+                'requiredSkillsPreview',
+                'niceToHavePreview',
+                'responsibilitiesPreview',
+                'certificationsPreview'
+            ];
+
+            previewContainers.forEach(previewId => {
+                document.getElementById(previewId).innerHTML = '';
+            });
+
+            // Hide optional skills weight field
+            document.getElementById('optionalSkillsWeightGroup').style.display = 'none';
+
+            // Reset weight values to default
+            document.getElementById('educationWeight').value = 15;
+            document.getElementById('experienceWeight').value = 25;
+            document.getElementById('projectsWeight').value = 20;
+            document.getElementById('certificationsWeight').value = 10;
+            document.getElementById('requiredSkillsWeight').value = 30;
+            document.getElementById('optionalSkillsWeight').value = 0;
+
+            // Update total weight
+            updateTotalWeight();
+
+            // Reset salary sliders
+            setSalaryRange(30000, 80000);
+
+            // Remove any error classes
+            const errorInputs = document.querySelectorAll('.form-input.error');
+            errorInputs.forEach(input => {
+                input.classList.remove('error');
+            });
+
+            const errorContainers = document.querySelectorAll('.tag-input-container.error, .bullet-input-container.error');
+            errorContainers.forEach(container => {
+                container.classList.remove('error');
+            });
+
+            const salaryContainer = document.getElementById('salaryRangeContainer');
+            salaryContainer.classList.remove('error');
+
+            // Re-validate form
+            validateForm();
+        }
+
+        // Show Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+
+            // Update toast styling based on type
+            if (type === 'error') {
+                toast.classList.remove('bg-green-500');
+                toast.classList.add('bg-red-500');
+            } else {
+                toast.classList.remove('bg-red-500');
+                toast.classList.add('bg-green-500');
+            }
+
+            toastMessage.textContent = message;
+            toast.style.transform = 'translateY(0)';
+
+            setTimeout(() => {
+                toast.style.transform = 'translateY(100%)';
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>

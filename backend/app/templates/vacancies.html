@@ -1,0 +1,133 @@
+<!-- Vacancies API Testing -->
+<style>
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    margin-top: 20px;
+    padding-bottom: 10px;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+}
+
+/* scrollbar */
+.table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: #cbd5e1; 
+    border-radius: 10px;
+}
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.vacancy-table {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.vacancy-table th {
+    background: #f3f4f6;
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.vacancy-table td {
+    background: white;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: #444;
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+}
+
+.wrap {
+    white-space: normal;
+    max-width: 300px;
+    word-wrap: break-word;
+}
+
+.badge {
+    display: inline-block;
+    background: #e0e7ff;
+    color: #1e3a8a;
+    padding: 3px 8px;
+    margin: 2px 4px 2px 0;
+    font-size: 12px;
+    border-radius: 6px;
+}
+</style>
+<div class="table-wrapper">
+<table class="vacancy-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Position</th>
+            <th>Description</th>
+            <th>Dept</th>
+            <th>Responsibilities</th>
+            <th>Certifications</th>
+            <th>Required Skills</th>
+            <th>Optional Skills</th>
+            <th>Location</th>
+            <th>Work</th>
+            <th>Salary</th>
+            <th>Status</th>
+            <th>Deadline</th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for v in vacancies %}
+        <tr>
+            <td>{{ v.id }}</td>
+            <td>{{ v.job_position }}</td>
+            <td class="wrap">{{ v.job_description }}</td>
+            <td>{{ v.department }}</td>
+
+            <td>
+                {% for r in v.responsibilities %}
+                    <span class="badge">{{ r.responsibility }}</span>
+                {% endfor %}
+            </td>
+
+            <td>
+                {% for c in v.certifications %}
+                    <span class="badge">{{ c.certification }}</span>
+                {% endfor %}
+            </td>
+
+            <td>
+                {% for s in v.required_skills %}
+                    <span class="badge">{{ s.skill }}</span>
+                {% endfor %}
+            </td>
+
+            <td>
+                {% for s in v.optional_skills %}
+                    <span class="badge">{{ s.skill }}</span>
+                {% endfor %}
+            </td>
+
+            <td>{{ v.job_location }}</td>
+            <td>{{ v.work_type }}</td>
+
+            <td>{{ v.salary_min }} - {{ v.salary_max }}</td>
+
+            <td>{{ v.status }}</td>
+
+            <td>{{ v.application_deadline.date() }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
