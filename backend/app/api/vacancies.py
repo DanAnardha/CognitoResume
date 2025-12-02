@@ -20,6 +20,16 @@ def list_vacancies(request: Request, db: Session = Depends(get_db)):
         "vacancies.html",
         {"request": request, "vacancies": vacancies}
     )
+
+@router.get("/{public_id}")
+def recruiter_get(request: Request, public_id: str, db: Session = Depends(get_db)):
+    vacancy = db.query(Vacancy).filter_by(public_id=public_id).first()
+    if not vacancy:
+        raise HTTPException(404, "Vacancy not found")
+    return templates.TemplateResponse(
+        "details.html",
+        {"request": request, "vacancy": vacancy, "weights": vacancy.weight}
+    )
     
 @router.post("/", response_model=VacancyResponse)
 def create_vacancy_api(vacancy_data: VacancyCreate, db: Session = Depends(get_db)):
