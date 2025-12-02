@@ -23,9 +23,6 @@ def list_vacancies(request: Request, db: Session = Depends(get_db)):
     
 @router.post("/", response_model=VacancyResponse)
 def create_vacancy_api(vacancy_data: VacancyCreate, db: Session = Depends(get_db)):
-    """
-    Create a new job vacancy in the database.
-    """
     try:
         new_vacancy = create_vacancy(db=db, vacancy_data=vacancy_data)
         return new_vacancy.to_dict()
@@ -38,6 +35,19 @@ def add_vacancy_form(request: Request):
     return templates.TemplateResponse("add_vacancy.html", {
         "request": request
 })
+    
+@router.post("/{vacancy_id}/toggle_status")
+def toggle_vacancy_status(vacancy_id: str, db: Session = Depends(get_db)):
+    vacancy = db.query(Vacancy).filter(Vacancy.id == vacancy_id).first()
+    if not vacancy:
+        raise HTTPException(status_code=404, detail="Vacancy not found")
+    if vacancy.status.lower() == "active":
+        vacancy.status = "inactive"
+    else:
+        vacancy.status = "active"
+    db.commit()
+    db.refresh(vacancy)
+    return {"id": vacancy.id, "new_status": vacancy.status}
 
 @router.get("/vacancies")
 def list_vacancies(request: Request, db=Depends(get_db)):

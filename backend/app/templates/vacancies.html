@@ -1,133 +1,1117 @@
-<!-- Vacancies API Testing -->
-<style>
-.table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    margin-top: 20px;
-    padding-bottom: 10px;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 10px;
-}
+<!DOCTYPE html>
+<html lang="en">
 
-/* scrollbar */
-.table-wrapper::-webkit-scrollbar {
-    height: 8px;
-}
-.table-wrapper::-webkit-scrollbar-thumb {
-    background: #cbd5e1; 
-    border-radius: 10px;
-}
-.table-wrapper::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruiter Dashboard - Job Vacancy Management</title>
 
-.vacancy-table {
-    width: max-content;
-    min-width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px;
-}
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-.vacancy-table th {
-    background: #f3f4f6;
-    text-align: left;
-    padding: 10px 14px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #333;
-    white-space: nowrap;
-    border-bottom: 2px solid #e5e7eb;
-}
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-.vacancy-table td {
-    background: white;
-    padding: 12px 14px;
-    font-size: 14px;
-    color: #444;
-    border-top: 1px solid #e5e7eb;
-    border-bottom: 1px solid #e5e7eb;
-    vertical-align: top;
-}
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-.wrap {
-    white-space: normal;
-    max-width: 300px;
-    word-wrap: break-word;
-}
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-.badge {
-    display: inline-block;
-    background: #e0e7ff;
-    color: #1e3a8a;
-    padding: 3px 8px;
-    margin: 2px 4px 2px 0;
-    font-size: 12px;
-    border-radius: 6px;
-}
-</style>
-<div class="table-wrapper">
-<table class="vacancy-table">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Position</th>
-            <th>Description</th>
-            <th>Dept</th>
-            <th>Responsibilities</th>
-            <th>Certifications</th>
-            <th>Required Skills</th>
-            <th>Optional Skills</th>
-            <th>Location</th>
-            <th>Work</th>
-            <th>Salary</th>
-            <th>Status</th>
-            <th>Deadline</th>
-        </tr>
-    </thead>
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
 
-    <tbody>
-    {% for v in vacancies %}
-        <tr>
-            <td>{{ v.id }}</td>
-            <td>{{ v.job_position }}</td>
-            <td class="wrap">{{ v.job_description }}</td>
-            <td>{{ v.department }}</td>
+        /* --- Status Badge Styles --- */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+            text-transform: capitalize;
+        }
 
-            <td>
-                {% for r in v.responsibilities %}
-                    <span class="badge">{{ r.responsibility }}</span>
-                {% endfor %}
-            </td>
+        .badge-active {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
 
-            <td>
-                {% for c in v.certifications %}
-                    <span class="badge">{{ c.certification }}</span>
-                {% endfor %}
-            </td>
+        .badge-inactive {
+            background-color: #f3f4f6;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
 
-            <td>
-                {% for s in v.required_skills %}
-                    <span class="badge">{{ s.skill }}</span>
-                {% endfor %}
-            </td>
+        .badge-draft {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
 
-            <td>
-                {% for s in v.optional_skills %}
-                    <span class="badge">{{ s.skill }}</span>
-                {% endfor %}
-            </td>
+        /* --- Professional Job Card Styles --- */
+        .job-card {
+            transition: all 0.2s ease-in-out;
+            border: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
 
-            <td>{{ v.job_location }}</td>
-            <td>{{ v.work_type }}</td>
+        .job-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-color: #d1d5db;
+        }
 
-            <td>{{ v.salary_min }} - {{ v.salary_max }}</td>
+        .job-card .job-title {
+            transition: color 0.2s ease;
+        }
 
-            <td>{{ v.status }}</td>
+        .job-card:hover .job-title {
+            color: #2563eb;
+        }
 
-            <td>{{ v.application_deadline.date() }}</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-</div>
+        /* Inactive Card Styles - Greyed Out */
+        .job-card.inactive {
+            opacity: 0.7;
+            background-color: #f9fafb;
+        }
+
+        .job-card.inactive .job-title {
+            color: #6b7280;
+        }
+
+        .job-card.inactive .job-title:hover {
+            color: #9ca3af;
+        }
+
+        .job-card.inactive .text-gray-900 {
+            color: #6b7280 !important;
+        }
+
+        .job-card.inactive .text-gray-700 {
+            color: #9ca3af !important;
+        }
+
+        .job-card.inactive .text-gray-600 {
+            color: #9ca3af !important;
+        }
+
+        .job-card.inactive .skill-tag {
+            background-color: #e5e7eb;
+            color: #9ca3af;
+        }
+
+        .job-card.inactive .progress-container {
+            background-color: #e5e7eb;
+        }
+
+        .job-card.inactive .action-btn {
+            color: #9ca3af;
+        }
+
+        .job-card.inactive .action-btn:hover {
+            color: #6b7280;
+            background-color: #f3f4f6;
+        }
+
+        .skill-tag {
+            background-color: #f3f4f6;
+            color: #374151;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .skill-tag:hover {
+            background-color: #e5e7eb;
+        }
+
+        /* Action Button Styles - Clean without Background */
+        .action-btn {
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            color: #6b7280;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+        }
+
+        /* Primary Action - View Details */
+        .action-btn.view-details {
+            color: #3b82f6;
+        }
+
+        .action-btn.view-details:hover {
+            color: #1d4ed8;
+            background-color: #f0f9ff;
+            transform: translateY(-1px);
+        }
+
+        /* Quick Action - Toggle Status */
+        .action-btn.toggle-status {
+            color: #10b981;
+        }
+
+        .action-btn.toggle-status:hover {
+            color: #059669;
+            background-color: #f0fdf4;
+            transform: translateY(-1px);
+        }
+
+        .action-btn.toggle-status.inactive {
+            color: #6b7280;
+        }
+
+        .action-btn.toggle-status.inactive:hover {
+            color: #374151;
+            background-color: #f9fafb;
+        }
+
+        /* Danger Action - Delete */
+        .action-btn.delete {
+            color: #dc2626;
+        }
+
+        .action-btn.delete:hover {
+            color: #b91c1c;
+            background-color: #fef2f2;
+            transform: translateY(-1px);
+        }
+
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 0.5rem;
+            background-color: #1f2937;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 10;
+            transition: opacity 0.2s ease;
+        }
+
+        .action-btn:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Progress Bar Styles */
+        .progress-container {
+            background-color: #f3f4f6;
+            border-radius: 9999px;
+            height: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.5s ease-in-out;
+            position: relative;
+        }
+
+        .progress-bar-low {
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        }
+
+        .progress-bar-medium {
+            background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .progress-bar-high {
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .progress-bar-full {
+            background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* --- Other Styles (Loading, Animations, etc.) --- */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .loading-subtitle {
+            font-size: 1rem;
+            color: #6b7280;
+        }
+
+        .stat-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px -3px rgba(0, 0, 0, 0.1), 0 3px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            transition: width 0.5s ease-in-out;
+        }
+
+        .activity-item {
+            position: relative;
+            padding-left: 40px;
+            margin-bottom: 12px;
+        }
+
+        .activity-item::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 24px;
+            bottom: -12px;
+            width: 2px;
+            background: #e5e7eb;
+        }
+
+        .activity-item:last-child::before {
+            display: none;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .job-card {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .stat-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .stat-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .stat-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .stat-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .job-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .job-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .job-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .page-btn {
+            transition: all 0.2s ease;
+        }
+
+        .page-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .page-btn.active {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        /* --- Dark Mode --- */
+        .dark {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+
+        .dark .bg-white {
+            background-color: #2d3748 !important;
+        }
+
+        .dark .text-gray-900 {
+            color: #e2e8f0 !important;
+        }
+
+        .dark .text-gray-800 {
+            color: #e2e8f0 !important;
+        }
+
+        .dark .text-gray-700 {
+            color: #cbd5e0 !important;
+        }
+
+        .dark .text-gray-600 {
+            color: #a0aec0 !important;
+        }
+
+        .dark .text-gray-500 {
+            color: #718096 !important;
+        }
+
+        .dark .border-gray-200 {
+            border-color: #4a5568 !important;
+        }
+
+        .dark .border-gray-100 {
+            border-color: #4a5568 !important;
+        }
+
+        .dark .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .dark .job-card {
+            background-color: #2d3748;
+            border-color: #4a5568;
+        }
+
+        .dark .job-card:hover {
+            border-color: #718096;
+        }
+
+        .dark .job-card.inactive {
+            background-color: #2a3441;
+        }
+
+        .dark .skill-tag {
+            background-color: #4a5568;
+            color: #e2e8f0;
+        }
+
+        .dark .skill-tag:hover {
+            background-color: #718096;
+        }
+
+        .dark .progress-container {
+            background-color: #4a5568;
+        }
+
+        .dark .modal-content {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+
+        /* Dark mode adjustments for action buttons */
+        .dark .action-btn.view-details {
+            background-color: #1e3a8a;
+            border-color: #1e40af;
+        }
+
+        .dark .action-btn.view-details:hover {
+            background-color: #1e40af;
+        }
+
+        .dark .action-btn.toggle-status {
+            background-color: #064e3b;
+            border-color: #065f46;
+        }
+
+        .dark .action-btn.toggle-status:hover {
+            background-color: #065f46;
+        }
+
+        .dark .action-btn.delete {
+            background-color: #7f1d1d;
+            border-color: #991b1b;
+        }
+
+        .dark .action-btn.delete:hover {
+            background-color: #991b1b;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 min-h-screen transition-colors duration-300">
+    <!-- LOADING SCREEN -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h1 class="loading-title">Loading Dashboard</h1>
+            <p class="loading-subtitle">Please wait while we fetch data...</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header
+        class="bg-white shadow-[0_0_20px_rgba(0,0,0,0.15)] border-b border-gray-200 transition-colors duration-300 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-lg">
+                        <i class="fas fa-briefcase text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Recruiter Dashboard</h1>
+                        <p class="text-sm text-gray-500">Private vacancy management system</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="theme-toggle"
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-all duration-300">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <button
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Privacy Settings</span>
+                    </button>
+                    <button
+                        class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center space-x-2">
+                        <i class="fas fa-download"></i>
+                        <span>Export Report</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Statistics Section -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-4">
+        <!-- Section Title -->
+        <div class="mb-4 text-center">
+            <h2 class="text-2xl font-bold text-gray-900 mb-1">Manage Job Vacancies</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto text-sm">Track, manage, and analyze all your job vacancies in one
+                centralized dashboard.</p>
+        </div>
+
+        <!-- Main Statistics Cards - More Compact -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="stat-card bg-white rounded-lg shadow-[0_0_15px_rgba(0,0,0,0.1)] p-4 opacity-0">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="bg-blue-100 p-2 rounded-lg">
+                        <i class="fas fa-briefcase text-blue-600"></i>
+                    </div>
+                    <span class="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                        <i class="fas fa-arrow-up mr-1" style="font-size: 0.6rem;"></i>12%
+                    </span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">24</h3>
+                <p class="text-xs text-gray-600 mt-1">Total Vacancies</p>
+            </div>
+
+            <div class="stat-card bg-white rounded-lg shadow-[0_0_15px_rgba(0,0,0,0.1)] p-4 opacity-0">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="bg-green-100 p-2 rounded-lg">
+                        <i class="fas fa-check-circle text-green-600"></i>
+                    </div>
+                    <span class="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                        <i class="fas fa-arrow-up mr-1" style="font-size: 0.6rem;"></i>8%
+                    </span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">18</h3>
+                <p class="text-xs text-gray-600 mt-1">Active Vacancies</p>
+            </div>
+
+            <div class="stat-card bg-white rounded-lg shadow-[0_0_15px_rgba(0,0,0,0.1)] p-4 opacity-0">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="bg-blue-100 p-2 rounded-lg">
+                        <i class="fas fa-users text-blue-600"></i>
+                    </div>
+                    <span class="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                        <i class="fas fa-arrow-up mr-1" style="font-size: 0.6rem;"></i>24%
+                    </span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">847</h3>
+                <p class="text-xs text-gray-600 mt-1">Total Applicants</p>
+            </div>
+
+            <div class="stat-card bg-white rounded-lg shadow-[0_0_15px_rgba(0,0,0,0.1)] p-4 opacity-0">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="bg-blue-100 p-2 rounded-lg">
+                        <i class="fas fa-user-check text-blue-600"></i>
+                    </div>
+                    <span class="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                        <i class="fas fa-arrow-up mr-1" style="font-size: 0.6rem;"></i>15%
+                    </span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">42</h3>
+                <p class="text-xs text-gray-600 mt-1">Shortlisted Candidates</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+        <div class="bg-white rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.15)] p-4 flex flex-wrap gap-3 items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-filter text-gray-400"></i>
+                <span class="text-sm font-medium text-gray-700">Filter:</span>
+            </div>
+            <select
+                class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option>All Status</option>
+                <option>Active</option>
+                <option>Inactive</option>
+                <option>Closing Soon</option>
+                <option>Urgent</option>
+            </select>
+            <input type="text" placeholder="Search position..."
+                class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 min-w-[200px]">
+            <button
+                class="bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-700 transition-colors">
+                <i class="fas fa-search mr-2"></i>Search
+            </button>
+        </div>
+    </section>
+
+    <!-- Main Content - Dynamic Job Cards -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center space-x-2">
+                <h3 class="text-xl font-semibold text-gray-900">Active Vacancies</h3>
+                <span class="text-sm text-gray-500">Showing {{ vacancies|length }} of {{ vacancies|length }}
+                    vacancies</span>
+            </div>
+            <a href="add"
+                class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center space-x-2">
+                <i class="fas fa-plus"></i>
+                <span>Add Vacancy</span>
+            </a>
+        </div>
+
+        <!-- Reduced gap between cards from gap-6 to gap-4 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="jobCards">
+            <!-- Dynamic Job Card using Jinja2 -->
+            {% for v in vacancies %}
+            {% set applicants = v.num_applicants or 0 %}
+            {% set max_app = v.max_applicants or 1 %}
+            {% set progress_percentage = (applicants / max_app * 100) %}
+            {% set progress_class = "progress-bar-low" if progress_percentage < 50 else ("progress-bar-medium" if
+                progress_percentage < 80 else ("progress-bar-high" if progress_percentage < 100 else "progress-bar-full"
+                )) %} {% set status=v.status|lower %} <div
+                class="job-card bg-white rounded-lg p-5 flex flex-col h-full {% if status == 'inactive' %}inactive{% endif %}">
+                <!-- Card Header with Title and Status -->
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex-1 pr-3">
+                        <h3 class="job-title text-lg font-semibold text-gray-900 cursor-pointer mb-1">{{ v.job_position
+                            }}</h3>
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-building mr-1.5 text-gray-400"></i>
+                            <span>{{ v.department }}</span>
+                            <span class="mx-2 text-gray-300">•</span>
+                            <i class="fas fa-map-marker-alt mr-1.5 text-gray-400"></i>
+                            <span>{{ v.job_location }}</span>
+                        </div>
+                    </div>
+                    <!-- Dynamic Status Badge with Color Indicator -->
+                    {% if status == 'active' %}
+                    <span class="badge badge-active text-xs flex-shrink-0">Active</span>
+                    {% elif status == 'inactive' %}
+                    <span class="badge badge-inactive text-xs flex-shrink-0">Inactive</span>
+                    {% else %}
+                    <span class="badge badge-draft text-xs flex-shrink-0">{{ status }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Job Description -->
+                <div class="mb-3">
+                    <p class="text-sm text-gray-700 line-clamp-2">{{ v.job_description }}</p>
+                </div>
+
+                <!-- Compact Job Details Section -->
+                <div class="mb-3 flex items-center gap-4 text-xs text-gray-600">
+                    <div class="flex items-center">
+                        <i class="fas fa-briefcase text-gray-400 mr-1"></i>
+                        <span>{{ v.work_type }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-dollar-sign text-gray-400 mr-1"></i>
+                        <span>{{ "{:,}".format(v.salary_min) }}-{{ "{:,}".format(v.salary_max) }}</span>
+                    </div>
+                </div>
+
+                <!-- Required Skills Section -->
+                <div class="mb-3 flex-grow">
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-tools text-gray-400 mr-2"></i>
+                        <p class="text-xs font-semibold text-gray-700">Required Skills</p>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5">
+                        {% for s in v.required_skills %}
+                        {% if loop.index0 < 4 %} <span class="skill-tag text-xs">{{ s.skill }}</span>
+                            {% endif %}
+                            {% if loop.index0 == 3 and v.required_skills|length > 4 %}
+                            <span class="skill-tag text-xs">+{{ v.required_skills|length - 4 }} more</span>
+                            {% endif %}
+                            {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Progress Bar Section -->
+                <div class="mb-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-medium text-gray-700">Application Progress</span>
+                        <span class="text-xs text-gray-500">{{ v.num_applicants }}/{{ v.max_applicants }}</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar {{ progress_class }}" style="width: {{ progress_percentage }}%"></div>
+                    </div>
+                    <div class="mt-1 text-right">
+                        <span
+                            class="text-xs font-medium {% if progress_percentage < 50 %}text-green-600{% elif progress_percentage < 80 %}text-amber-600{% elif progress_percentage < 100 %}text-red-600{% else %}text-purple-600{% endif %}">
+                            {{ "%.1f"|format(progress_percentage) }}% Full
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Card Footer with Dates and Simplified Actions -->
+                <div class="mt-auto pt-3 border-t border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <div class="text-xs text-gray-500">
+                            <div class="flex items-center">
+                                <i class="fas fa-calendar-alt mr-1.5"></i>
+                                <span>Posted: {{ v.posting_date.strftime('%b %d, %Y') if v.posting_date else 'N/A'
+                                    }}</span>
+                            </div>
+                            <div class="flex items-center mt-1">
+                                <i class="fas fa-clock mr-1.5"></i>
+                                <span>Deadline: {{ v.application_deadline.strftime('%b %d, %Y') if
+                                    v.application_deadline else "N/A" }}
+                                </span>
+                            </div>
+                        </div>
+                        <!-- Simplified Action Buttons - Clean Design -->
+                        <div class="flex items-center space-x-1">
+                            <!-- Primary Action: View Details -->
+                            <a href="/vacancies/{{ v.id }}/details" class="action-btn view-details"
+                                title="View Details">
+                                <i class="fas fa-eye"></i>
+                                <span class="tooltip">View Details</span>
+                            </a>
+                            <!-- Quick Action: Toggle Status -->
+                            <button class="action-btn toggle-status {% if status == 'inactive' %}inactive{% endif %}"
+                                data-vacancy-id="{{ v.id }}" data-current-status="{{ status }}" title="Toggle Status">
+                                {% if status == 'active' %}
+                                <i class="fas fa-toggle-on"></i>
+                                {% else %}
+                                <i class="fas fa-toggle-off"></i>
+                                {% endif %}
+                                <span class="tooltip">Toggle Status</span>
+                            </button>
+                            <!-- Danger Action: Delete -->
+                            <button class="action-btn delete" data-vacancy-id="{{ v.id }}"
+                                data-job-title="{{ v.job_position }}" title="Delete">
+                                <i class="fas fa-trash"></i>
+                                <span class="tooltip">Delete</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+        </div>
+        {% else %}
+        <div class="col-span-full text-center py-12">
+            <i class="fas fa-inbox text-gray-300 text-5xl mb-4"></i>
+            <p class="text-gray-500 text-lg">No vacancies found.</p>
+            <p class="text-gray-400">Try adjusting your filters or create a new vacancy.</p>
+        </div>
+        {% endfor %}
+        </div>
+
+        <!-- Pagination (placeholder for now) -->
+        <div class="flex justify-center items-center mt-8 space-x-2">
+            <button class="page-btn px-3 py-2 bg-white rounded-lg shadow hover:shadow-md transition-all"
+                onclick="changePage('prev')">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="page-btn px-3 py-2 bg-white rounded-lg shadow hover:shadow-md transition-all active"
+                onclick="changePage(1)">1</button>
+            <button class="page-btn px-3 py-2 bg-white rounded-lg shadow hover:shadow-md transition-all"
+                onclick="changePage(2)">2</button>
+            <button class="page-btn px-3 py-2 bg-white rounded-lg shadow hover:shadow-md transition-all"
+                onclick="changePage(3)">3</button>
+            <button class="page-btn px-3 py-2 bg-white rounded-lg shadow hover:shadow-md transition-all"
+                onclick="changePage('next')">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- Toggle Status Confirmation Modal -->
+    <div id="toggleModal" class="modal">
+        <div class="modal-content">
+            <div class="flex items-center mb-4">
+                <div class="bg-amber-100 p-3 rounded-full mr-3">
+                    <i class="fas fa-exchange-alt text-amber-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Toggle Status</h3>
+                    <p class="text-sm text-gray-600">Are you sure you want to change the status?</p>
+                </div>
+            </div>
+            <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                <p class="text-sm text-gray-700">
+                    Current status: <span id="currentStatus" class="font-medium"></span><br>
+                    New status: <span id="newStatus" class="font-medium"></span>
+                </p>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button id="cancelToggle"
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                    Cancel
+                </button>
+                <button id="confirmToggle"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="flex items-center mb-4">
+                <div class="bg-red-100 p-3 rounded-full mr-3">
+                    <i class="fas fa-trash text-red-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Delete Vacancy</h3>
+                    <p class="text-sm text-gray-600">This action cannot be undone</p>
+                </div>
+            </div>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                <p class="text-sm text-red-800">
+                    Are you sure you want to delete <span id="jobTitle" class="font-semibold"></span>?
+                </p>
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button id="cancelDelete"
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                    Cancel
+                </button>
+                <button id="confirmDelete"
+                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast"
+        class="fixed bottom-4 right-4 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-full transition-transform duration-300 flex items-center space-x-2">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Action completed successfully!</span>
+    </div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = themeToggle.querySelector('i');
+        const body = document.body;
+
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        if (currentTheme === 'dark') {
+            body.classList.add('dark');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            if (body.classList.contains('dark')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Hide loading screen after 1 second
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                const loadingScreen = document.getElementById('loadingScreen');
+                loadingScreen.style.opacity = '0';
+                setTimeout(function () {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 1000);
+        });
+
+        // Modal elements
+        const toggleModal = document.getElementById('toggleModal');
+        const deleteModal = document.getElementById('deleteModal');
+        let currentVacancyId = null;
+
+        // Toggle Status Modal
+        document.querySelectorAll('.toggle-status').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const vacancyId = e.currentTarget.dataset.vacancyId;
+                const currentStatus = e.currentTarget.dataset.currentStatus;
+                const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+
+                currentVacancyId = vacancyId;
+                document.getElementById('currentStatus').textContent = currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1);
+                document.getElementById('newStatus').textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+
+                toggleModal.classList.add('show');
+            });
+        });
+
+        // Delete Modal
+        document.querySelectorAll('.delete').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const vacancyId = e.currentTarget.dataset.vacancyId;
+                const jobTitle = e.currentTarget.dataset.jobTitle;
+
+                currentVacancyId = vacancyId;
+                document.getElementById('jobTitle').textContent = jobTitle;
+
+                deleteModal.classList.add('show');
+            });
+        });
+
+        // Close modals
+        document.getElementById('cancelToggle').addEventListener('click', () => {
+            toggleModal.classList.remove('show');
+            currentVacancyId = null;
+        });
+
+        document.getElementById('cancelDelete').addEventListener('click', () => {
+            deleteModal.classList.remove('show');
+            currentVacancyId = null;
+        });
+
+        // Confirm Toggle Status
+        document.getElementById('confirmToggle').addEventListener('click', async () => {
+            if (!currentVacancyId) return;
+
+            try {
+                const response = await fetch(`/vacancies/${currentVacancyId}/toggle_status`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to update status");
+                }
+
+                const result = await response.json();
+                const newStatus = result.new_status.toLowerCase();
+                const label = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+
+                // Update UI
+                const card = document.querySelector(`[data-vacancy-id="${currentVacancyId}"]`).closest('.job-card');
+                const statusBadge = card.querySelector('.badge');
+                const icon = card.querySelector('.toggle-status i');
+                const toggleBtn = card.querySelector('.toggle-status');
+
+                // Update status badge
+                if (newStatus === "active") {
+                    statusBadge.className = "badge badge-active text-xs flex-shrink-0";
+                    statusBadge.textContent = label;
+                    icon.className = "fas fa-toggle-on";
+                    // Remove inactive class from card
+                    card.classList.remove('inactive');
+                    toggleBtn.classList.remove('inactive');
+                } else {
+                    statusBadge.className = "badge badge-inactive text-xs flex-shrink-0";
+                    statusBadge.textContent = label;
+                    icon.className = "fas fa-toggle-off";
+                    // Add inactive class to card
+                    card.classList.add('inactive');
+                    toggleBtn.classList.add('inactive');
+                }
+
+                toggleBtn.dataset.currentStatus = newStatus;
+
+                toggleModal.classList.remove('show');
+                showToast(`Status updated to ${newStatus}!`);
+                currentVacancyId = null;
+
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to update status", "error");
+            }
+        });
+
+        // Confirm Delete
+        document.getElementById('confirmDelete').addEventListener('click', async () => {
+            if (!currentVacancyId) return;
+
+            try {
+                const response = await fetch(`/vacancies/${currentVacancyId}/delete`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to delete vacancy");
+                }
+
+                // Remove card from DOM
+                const card = document.querySelector(`[data-vacancy-id="${currentVacancyId}"]`).closest('.job-card');
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    card.remove();
+                }, 300);
+
+                deleteModal.classList.remove('show');
+                showToast("Vacancy deleted successfully!");
+                currentVacancyId = null;
+
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to delete vacancy", "error");
+            }
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === toggleModal) {
+                toggleModal.classList.remove('show');
+                currentVacancyId = null;
+            }
+            if (e.target === deleteModal) {
+                deleteModal.classList.remove('show');
+                currentVacancyId = null;
+            }
+        });
+
+        // Show Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = toast.querySelector('i');
+
+            toastMessage.textContent = message;
+
+            // Change toast color based on type
+            if (type === 'error') {
+                toast.className = 'fixed bottom-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-full transition-transform duration-300 flex items-center space-x-2';
+                toastIcon.className = 'fas fa-exclamation-circle';
+            } else {
+                toast.className = 'fixed bottom-4 right-4 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-full transition-transform duration-300 flex items-center space-x-2';
+                toastIcon.className = 'fas fa-check-circle';
+            }
+
+            toast.style.transform = 'translateY(0)';
+
+            setTimeout(() => {
+                toast.style.transform = 'translateY(100%)';
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
