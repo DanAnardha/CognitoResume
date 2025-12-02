@@ -1,0 +1,2323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Vacancy Details - Recruiter Dashboard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .badge-primary {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-secondary {
+            background-color: #f3f4f6;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
+
+        .text-2xs {
+            font-size: 0.5rem;
+            line-height: 0.75rem;
+        }
+
+        /* Status Badge Colors */
+        .badge-status-shortlisted {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-status-accepted {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-status-rejected {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-status-processed {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .badge-status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-active {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-inactive {
+            background-color: #f3f4f6;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
+
+        .badge-draft {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Completeness Badge */
+        .badge-completeness {
+            display: inline-block;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .badge-completeness-high {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-completeness-medium {
+            background-color: #fed7aa;
+            color: #92400e;
+        }
+
+        .badge-completeness-low {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .responsibility-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .responsibility-item i {
+            color: #3b82f6;
+            margin-top: 0.1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Custom progress bar animation */
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* --- LOADING SCREEN STYLES --- */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .loading-subtitle {
+            font-size: 1rem;
+            color: #6b7280;
+        }
+
+        /* --- Dropdown Menu Styles --- */
+        .dropdown-submenu {
+            position: absolute;
+            top: 0;
+            right: 100%;
+            background-color: white;
+            border-radius: 0.375rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 0.5rem 0;
+            min-width: 12rem;
+            display: none;
+            z-index: 20;
+        }
+
+        .dropdown-item-has-submenu:hover .dropdown-submenu {
+            display: block;
+        }
+
+        .dropdown-submenu a {
+            display: block;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            color: #374151;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .dropdown-submenu a:hover {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+
+        /* --- Print Styles --- */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            .print-area,
+            .print-area * {
+                visibility: visible;
+            }
+
+            .print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        /* --- Tab Styles --- */
+        .tab-button {
+            position: relative;
+            padding: 0.75rem 1.5rem;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .tab-button:hover {
+            color: #374151;
+            background-color: #f9fafb;
+        }
+
+        .tab-button.active {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* --- Applicant Card Styles --- */
+        .applicant-card {
+            transition: all 0.2s ease-in-out;
+            border: 1px solid #e5e7eb;
+        }
+
+        .applicant-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-color: #d1d5db;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Dark Mode --- */
+        .dark {
+            background-color: #1a202c;
+            color: #e2e8f0;
+        }
+
+        .dark .bg-white {
+            background-color: #2d3748 !important;
+        }
+
+        .dark .text-gray-900 {
+            color: #e2e8f0 !important;
+        }
+
+        .dark .text-gray-800 {
+            color: #e2e8f0 !important;
+        }
+
+        .dark .text-gray-700 {
+            color: #cbd5e0 !important;
+        }
+
+        .dark .text-gray-600 {
+            color: #a0aec0 !important;
+        }
+
+        .dark .text-gray-500 {
+            color: #718096 !important;
+        }
+
+        .dark .border-gray-200 {
+            border-color: #4a5568 !important;
+        }
+
+        .dark .border-gray-100 {
+            border-color: #4a5568 !important;
+        }
+
+        .dark .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        .dark .tab-button:hover {
+            background-color: #374151;
+        }
+
+        .dark .applicant-card {
+            background-color: #2d3748;
+            border-color: #4a5568;
+        }
+
+        .dark .applicant-card:hover {
+            border-color: #718096;
+        }
+
+        /* --- Skill Tag Styles --- */
+        .skill-tag {
+            background-color: #f3f4f6;
+            color: #374151;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .skill-tag:hover {
+            background-color: #e5e7eb;
+        }
+
+        /* --- Tooltip --- */
+        .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 0.5rem;
+            background-color: #1f2937;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 10;
+            transition: opacity 0.2s ease;
+        }
+
+        .action-btn:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* --- Action Button Styles --- */
+        .action-btn {
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            color: #6b7280;
+            position: relative;
+        }
+
+        .action-btn:hover {
+            color: #374151;
+            background-color: #f3f4f6;
+        }
+
+        .action-btn.view-details {
+            color: #3b82f6;
+        }
+
+        .action-btn.view-details:hover {
+            color: #1d4ed8;
+            background-color: #dbeafe;
+        }
+
+        .action-btn.toggle-status {
+            color: #10b981;
+        }
+
+        .action-btn.toggle-status:hover {
+            color: #059669;
+            background-color: #f0fdf4;
+        }
+
+        .action-btn.delete {
+            color: #dc2626;
+        }
+
+        .action-btn.delete:hover {
+            color: #b91c1c;
+            background-color: #fee2e2;
+        }
+
+        /* --- Modal Styles --- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- Weight Control Styles --- */
+        .weight-btn-minus,
+        .weight-btn-plus {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid #d1d5db;
+            background-color: white;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .weight-btn-minus:hover,
+        .weight-btn-plus:hover {
+            background-color: #f3f4f6;
+            border-color: #9ca3af;
+            color: #374151;
+        }
+
+        .weight-input {
+            width: 50px;
+            height: 28px;
+            padding: 0 0.25rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            text-align: center;
+            font-size: 0.875rem;
+        }
+
+        .weight-badge {
+            background: #3b82f6;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            min-width: 3rem;
+            text-align: center;
+        }
+
+        .weight-slider {
+            -webkit-appearance: none;
+            width: 100px;
+            height: 4px;
+            border-radius: 2px;
+            background: #e5e7eb;
+            outline: none;
+        }
+
+        .weight-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .weight-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #2563eb;
+        }
+
+        .weight-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .weight-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            background: #2563eb;
+        }
+
+        /* Dark mode support */
+        .dark .weight-btn-minus,
+        .dark .weight-btn-plus {
+            background-color: #4b5563;
+            border-color: #6b7280;
+            color: #d1d5db;
+        }
+
+        .dark .weight-btn-minus:hover,
+        .dark .weight-btn-plus:hover {
+            background-color: #6b7280;
+        }
+
+        .dark .weight-input {
+            background-color: #4b5563;
+            border-color: #6b7280;
+            color: #e5e7eb;
+        }
+
+        .dark .weight-slider {
+            background: #4b5563;
+        }
+
+        /* Enhanced rounded corners */
+        .modal-content-compact {
+            border-radius: 1.5rem !important;
+            /* 24px */
+        }
+
+        .modal-header-compact {
+            border-radius: 1.5rem 1.5rem 0 0 !important;
+        }
+
+        .modal-footer-compact {
+            border-radius: 0 0 1.5rem 1.5rem !important;
+        }
+
+        .weight-item-compact {
+            border-radius: 0.75rem !important;
+            /* 12px */
+        }
+
+        .weight-btn-minus,
+        .weight-btn-plus {
+            border-radius: 50% !important;
+            /* Perfect circle */
+        }
+
+        .weight-input {
+            border-radius: 0.5rem !important;
+            /* 8px */
+        }
+
+        .weight-badge {
+            border-radius: 9999px !important;
+            /* Full rounded */
+        }
+
+        .weight-slider {
+            border-radius: 9999px !important;
+            /* Full rounded for track */
+        }
+
+        .weight-slider::-webkit-slider-thumb {
+            border-radius: 50% !important;
+            /* Perfect circle for thumb */
+        }
+
+        .weight-slider::-moz-range-thumb {
+            border-radius: 50% !important;
+            /* Perfect circle for thumb */
+        }
+
+        /* Progress bars */
+        .progress-bar {
+            border-radius: 9999px !important;
+        }
+
+        .progress-fill {
+            border-radius: 9999px !important;
+        }
+
+        /* Cards inside modal */
+        .weight-card {
+            border-radius: 0.75rem !important;
+        }
+
+        .validation-card {
+            border-radius: 0.75rem !important;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+    <!-- LOADING SCREEN -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h1 class="loading-title">Loading Vacancy Details</h1>
+            <p class="loading-subtitle">Please wait while we fetch vacancy data...</p>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white shadow-[0_0_20px_rgba(0,0,0,0.15)] border-b border-gray-200 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-lg">
+                        <i class="fas fa-briefcase text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Recruiter Dashboard</h1>
+                        <p class="text-sm text-gray-500">Private vacancy management system</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="theme-toggle"
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-all duration-300">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                    <button
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Privacy Settings</span>
+                    </button>
+                    <button
+                        class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center space-x-2">
+                        <i class="fas fa-download"></i>
+                        <span>Export Report</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Back Button & Status -->
+        <div class="flex items-center justify-between mb-4 no-print">
+            <button onclick="goBack()" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Vacancies
+            </button>
+            <span class="text-sm text-gray-500">Vacancy ID: #{{ vacancy.public_id if vacancy else 'N/A' }}</span>
+        </div>
+
+        <!-- Tabs Container -->
+        <div class="bg-white rounded-lg shadow-[0_0_20px_rgba(0,0,0,0.15)]">
+            <!-- Tab Navigation -->
+            <div class="border-b border-gray-200">
+                <nav class="flex -mb-px">
+                    <button class="tab-button active" onclick="switchTab('details')">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Vacancy Details
+                    </button>
+                    <button class="tab-button" onclick="switchTab('statistics')">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        Statistics
+                    </button>
+                    <button class="tab-button" onclick="switchTab('applicants')">
+                        <i class="fas fa-users mr-2"></i>
+                        Applicants
+                        <span class="ml-2 bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs font-medium">{{
+                            vacancy.num_applicants if vacancy else 0 }}</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Tab Contents -->
+            <div class="p-6 md:p-8">
+                <!-- Vacancy Details Tab -->
+                <div id="details-tab" class="tab-content active">
+                    <!-- Single Unified Vacancy Block -->
+                    <div id="vacancyDetailsContainer" class="mb-6">
+                        <!-- Compact Job Header -->
+                        <div
+                            class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 pb-4 border-b border-gray-100">
+                            <div class="flex-1">
+                                <h2 class="text-2xl font-bold text-gray-900 leading-tight">{{ vacancy.job_position if
+                                    vacancy else 'N/A' }}</h2>
+                                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-gray-500">
+                                    <span class="flex items-center">
+                                        <i class="fas fa-building mr-1"></i> {{ vacancy.department if vacancy else 'N/A'
+                                        }}
+                                    </span>
+                                    <span class="flex items-center">
+                                        <i class="fas fa-map-marker-alt mr-1"></i> {{ vacancy.job_location if vacancy
+                                        else 'N/A' }}
+                                    </span>
+                                    <span class="flex items-center">
+                                        <i class="fas fa-briefcase mr-1"></i> {{ vacancy.experience_level if vacancy
+                                        else 'N/A' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 sm:justify-end no-print">
+                                {% if vacancy.status == 'active' %}
+                                <span class="badge badge-active">
+                                    <i class="fas fa-circle text-green-500 text-xs mr-2" style="font-size: 6px;"></i>
+                                    Active
+                                </span>
+                                {% elif vacancy.status == 'inactive' %}
+                                <span class="badge badge-inactive">
+                                    <i class="fas fa-circle text-gray-500 text-xs mr-2" style="font-size: 6px;"></i>
+                                    Inactive
+                                </span>
+                                {% else %}
+                                <span class="badge badge-draft">
+                                    <i class="fas fa-circle text-yellow-500 text-xs mr-2" style="font-size: 6px;"></i>
+                                    {{ vacancy.status|capitalize }}
+                                </span>
+                                {% endif %}
+                                <span class="text-sm text-gray-500">{{ vacancy.num_applicants if vacancy else 0 }}
+                                    Applicants</span>
+
+                                <!-- Actions Dropdown -->
+                                <div class="relative">
+                                    <button onclick="toggleDropdown()"
+                                        class="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-md px-3 py-1.5 hover:bg-gray-50 transition-colors">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div id="actionsDropdown"
+                                        class="hidden absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                                        <div class="py-1" role="menu">
+                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                role="menuitem">
+                                                <i class="fas fa-edit mr-2 text-gray-400"></i> Edit Vacancy
+                                            </a>
+                                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                role="menuitem">
+                                                <i class="fas fa-toggle-off mr-2 text-gray-400"></i> Deactivate
+                                            </a>
+                                            <div class="relative dropdown-item-has-submenu" role="menuitem">
+                                                <a href="#"
+                                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                    id="pdf-submenu-trigger">
+                                                    <i class="fas fa-file-pdf mr-2 text-gray-400"></i> Print as PDF
+                                                    <i class="fas fa-chevron-right ml-auto text-gray-400"></i>
+                                                </a>
+                                                <div id="pdf-submenu" class="dropdown-submenu">
+                                                    <a href="#" onclick="printFullPage()"
+                                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                        <i class="fas fa-print mr-2 text-gray-400"></i> Full Page
+                                                    </a>
+                                                    <a href="#" onclick="printVacancyDetails()"
+                                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                        <i class="fas fa-file-contract mr-2 text-gray-400"></i> Vacancy
+                                                        Details Only
+                                                    </a>
+                                                    <a href="#" onclick="printStatistics()"
+                                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                        <i class="fas fa-chart-bar mr-2 text-gray-400"></i> Statistics
+                                                        Only
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <hr class="my-1">
+                                            <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                                role="menuitem">
+                                                <i class="fas fa-trash mr-2"></i> Delete Vacancy
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Body Grid -->
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                            <!-- Left Column: Narrative Content -->
+                            <div class="lg:col-span-2 space-y-5">
+                                <!-- Job Description -->
+                                <div>
+                                    <h3 class="text-base font-semibold text-gray-900 mb-2">Job Description</h3>
+                                    <p class="text-gray-700 text-sm leading-relaxed">
+                                        {{ vacancy.job_description if vacancy else 'No job description available.' }}
+                                    </p>
+                                </div>
+
+                                <!-- Key Responsibilities -->
+                                <div>
+                                    <h3 class="text-base font-semibold text-gray-900 mb-3">Key Responsibilities</h3>
+                                    <ul class="space-y-2">
+                                        {% if vacancy.responsibilities %}
+                                        {% for r in vacancy.responsibilities %}
+                                        <li class="responsibility-item">
+                                            <i class="fas fa-check-circle"></i>
+                                            <p class="text-gray-700 text-sm">{{ r.responsibility }}</p>
+                                        </li>
+                                        {% endfor %}
+                                        {% else %}
+                                        <li class="responsibility-item">
+                                            <i class="fas fa-check-circle"></i>
+                                            <p class="text-gray-700 text-sm">No responsibilities listed.</p>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+
+                                <!-- Skills Section -->
+                                <div>
+                                    <h3 class="text-base font-semibold text-gray-900 mb-3">Skills & Qualifications</h3>
+                                    <div class="space-y-3">
+                                        <div>
+                                            <h4
+                                                class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                                                Required
+                                                Skills</h4>
+                                            <div class="flex flex-wrap gap-2">
+                                                {% if vacancy.required_skills %}
+                                                {% for s in vacancy.required_skills %}
+                                                <span class="skill-tag">{{ s.skill }}</span>
+                                                {% endfor %}
+                                                {% else %}
+                                                <span class="text-gray-500 text-sm">No required skills listed.</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <h4
+                                                class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                                                Nice-to-Have Skills</h4>
+                                            <div class="flex flex-wrap gap-2">
+                                                {% if vacancy.optional_skills %}
+                                                {% for s in vacancy.optional_skills %}
+                                                <span class="skill-tag">{{ s.skill }}</span>
+                                                {% endfor %}
+                                                {% else %}
+                                                <span class="text-gray-500 text-sm">No optional skills listed.</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Certifications -->
+                                <div>
+                                    <h3 class="text-base font-semibold text-gray-900 mb-3">Certifications</h3>
+                                    <ul class="space-y-2">
+                                        {% if vacancy.certifications %}
+                                        {% for c in vacancy.certifications %}
+                                        <li class="responsibility-item">
+                                            <i class="fas fa-certificate text-blue-500"></i>
+                                            <p class="text-gray-700 text-sm">{{ c.certification }}</p>
+                                        </li>
+                                        {% endfor %}
+                                        {% else %}
+                                        <li class="responsibility-item">
+                                            <i class="fas fa-certificate text-blue-500"></i>
+                                            <p class="text-gray-700 text-sm">No certifications listed.</p>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Ultra-Compact Structured Data -->
+                            <div class="lg:col-span-1 space-y-5">
+                                <!-- Compact Job Details -->
+                                <div>
+                                    <h3 class="text-base font-semibold text-gray-900 mb-3">Job Details</h3>
+                                    <dl class="space-y-2.5 text-sm">
+                                        <div class="flex justify-between items-center">
+                                            <dt class="flex items-center gap-2 text-gray-500"><i
+                                                    class="fas fa-layer-group w-4"></i>
+                                                Level</dt>
+                                            <dd class="font-medium text-gray-900">{{ vacancy.experience_level if vacancy
+                                                else 'N/A' }}</dd>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <dt class="flex items-center gap-2 text-gray-500"><i
+                                                    class="fas fa-clock w-4"></i>
+                                                Experience</dt>
+                                            <dd class="font-medium text-gray-900">{{ vacancy.min_years_experience if
+                                                vacancy else 'N/A' }} Years</dd>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <dt class="flex items-center gap-2 text-gray-500"><i
+                                                    class="fas fa-laptop-house w-4"></i> Work Type</dt>
+                                            <dd class="font-medium text-gray-900">{{ vacancy.work_type if vacancy else
+                                                'N/A' }}</dd>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <dt class="flex items-center gap-2 text-gray-500"><i
+                                                    class="fas fa-map-marker-alt w-4"></i> Location</dt>
+                                            <dd class="font-medium text-gray-900">{{ vacancy.job_location if vacancy
+                                                else 'N/A' }}</dd>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <dt class="flex items-center gap-2 text-gray-500"><i
+                                                    class="fas fa-calendar-times w-4"></i> Deadline</dt>
+                                            <dd class="font-medium text-gray-900">{{
+                                                vacancy.application_deadline.strftime('%b %d, %Y') if
+                                                vacancy.application_deadline else 'N/A' }}</dd>
+                                        </div>
+                                        <div class="flex justify-between items-center">
+                                            <dt class="flex items-center gap-2 text-gray-500"><i
+                                                    class="fas fa-calendar-plus w-4"></i> Posted</dt>
+                                            <dd class="font-medium text-gray-900">{{ vacancy.posting_date.strftime('%b
+                                                %d, %Y') if vacancy.posting_date else 'N/A' }}</dd>
+                                        </div>
+                                    </dl>
+                                </div>
+
+                                <!-- Education & Certifications (Moved Up) -->
+                                <div>
+                                    <h3 class="text-base font-semibold text-gray-900 mb-2">Education & Certifications
+                                    </h3>
+                                    <div class="space-y-1.5 text-sm">
+                                        <p><span class="font-semibold text-gray-700">Education:</span> {{
+                                            vacancy.education_requirements if vacancy else 'Not specified' }}</p>
+                                        <p><span class="font-semibold text-gray-700">Certifications:</span> {{
+                                            vacancy.certification_requirements if vacancy else 'Not specified' }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Salary Range -->
+                                <div>
+                                    <h3 class="text-base font-semibold text-gray-900 mb-2">Salary</h3>
+                                    <p class="text-xl font-bold text-gray-900">${{ "{:,}".format(vacancy.salary_min) if
+                                        vacancy else '0' }} — ${{ "{:,}".format(vacancy.salary_max) if vacancy else '0'
+                                        }} <span class="text-sm font-normal text-gray-500">/ year</span></p>
+                                </div>
+
+                                <!-- Max Applicants Progress Bar -->
+                                <div>
+                                    <h3 class="text-base font-semibold text-gray-900 mb-2">Applicants</h3>
+                                    <div class="flex items-center justify-between text-xs text-gray-500 mb-1.5">
+                                        <span>Progress</span>
+                                        <span class="font-medium">{{ vacancy.num_applicants if vacancy else 0 }} / {{
+                                            vacancy.max_applicants if vacancy else 0 }}</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                        {% set progress_percentage = (vacancy.num_applicants / vacancy.max_applicants *
+                                        100) if vacancy and vacancy.max_applicants > 0 else 0 %}
+                                        <div class="progress-bar-fill h-2 rounded-full"
+                                            style="width: {{ progress_percentage }}%"></div>
+                                    </div>
+                                    <div class="mt-1 text-right">
+                                        <span class="text-xs font-medium text-blue-600">{{
+                                            "%.1f"|format(progress_percentage) }}% Full</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Tab -->
+                <div id="statistics-tab" class="tab-content">
+                    <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <i class="fas fa-chart-line mr-3 text-blue-600"></i>
+                        Vacancy Analytics & Performance
+                    </h2>
+
+                    <!-- Key Metrics Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Total Applicants</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1 flex items-center gap-2">
+                                <span>{{ vacancy.num_applicants if vacancy else 0 }}</span>
+                                <i class="fas fa-users text-gray-400 text-lg"></i>
+                            </p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Avg Match</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1 flex items-center gap-2">
+                                <span>78%</span>
+                                <i class="fas fa-bullseye text-gray-400 text-lg"></i>
+                            </p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Avg Position Fit</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1 flex items-center gap-2">
+                                <span>85%</span>
+                                <i class="fas fa-user-check text-gray-400 text-lg"></i>
+                            </p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                            <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Avg Skills Fit</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1 flex items-center gap-2">
+                                <span>92%</span>
+                                <i class="fas fa-cogs text-gray-400 text-lg"></i>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Ultra-Compact Scoring Weights Section -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-base font-semibold text-gray-900 flex items-center">
+                                <i class="fas fa-balance-scale mr-2 text-blue-600"></i>
+                                Scoring Weights
+                            </h3>
+                            <button id="configureWeightsBtn"
+                                class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium flex items-center px-2 py-1 rounded hover:bg-blue-50 transition-colors">
+                                <i class="fas fa-sliders-h mr-1.5 text-xs"></i>
+                                Configure
+                            </button>
+                        </div>
+
+                        {% if weights %}
+                        <!-- Ultra-Compact Card Design -->
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <!-- Education -->
+                                <div class="flex items-center space-x-2 p-2 rounded hover:bg-blue-50 transition-colors">
+                                    <div
+                                        class="w-6 h-6 bg-blue-100 rounded flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-graduation-cap text-blue-600 text-xs"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between mb-0.5">
+                                            <div>
+                                                <span class="text-sm font-medium text-gray-700">Education</span>
+                                                <span class="text-xs text-gray-500 block">Academic degree</span>
+                                            </div>
+                                            <span class="text-sm font-bold text-gray-900">{{ weights.education_weight
+                                                }}%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-1">
+                                            <div class="bg-blue-600 h-1 rounded-full transition-all duration-500"
+                                                style="width: {{ weights.education_weight }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Experience -->
+                                <div class="flex items-center space-x-2 p-2 rounded hover:bg-blue-50 transition-colors">
+                                    <div
+                                        class="w-6 h-6 bg-blue-100 rounded flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-briefcase text-blue-600 text-xs"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between mb-0.5">
+                                            <div>
+                                                <span class="text-sm font-medium text-gray-700">Experience</span>
+                                                <span class="text-xs text-gray-500 block">Professional background</span>
+                                            </div>
+                                            <span class="text-sm font-bold text-gray-900">{{ weights.experience_weight
+                                                }}%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-1">
+                                            <div class="bg-blue-600 h-1 rounded-full transition-all duration-500"
+                                                style="width: {{ weights.experience_weight }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Projects -->
+                                <div class="flex items-center space-x-2 p-2 rounded hover:bg-blue-50 transition-colors">
+                                    <div
+                                        class="w-6 h-6 bg-blue-100 rounded flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-project-diagram text-blue-600 text-xs"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between mb-0.5">
+                                            <div>
+                                                <span class="text-sm font-medium text-gray-700">Projects</span>
+                                                <span class="text-xs text-gray-500 block">Portfolio achievements</span>
+                                            </div>
+                                            <span class="text-sm font-bold text-gray-900">{{ weights.projects_weight
+                                                }}%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-1">
+                                            <div class="bg-blue-600 h-1 rounded-full transition-all duration-500"
+                                                style="width: {{ weights.projects_weight }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Certifications -->
+                                <div class="flex items-center space-x-2 p-2 rounded hover:bg-blue-50 transition-colors">
+                                    <div
+                                        class="w-6 h-6 bg-blue-100 rounded flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-certificate text-blue-600 text-xs"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between mb-0.5">
+                                            <div>
+                                                <span class="text-sm font-medium text-gray-700">Certifications</span>
+                                                <span class="text-xs text-gray-500 block">Professional
+                                                    credentials</span>
+                                            </div>
+                                            <span class="text-sm font-bold text-gray-900">{{
+                                                weights.certifications_weight }}%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-1">
+                                            <div class="bg-blue-600 h-1 rounded-full transition-all duration-500"
+                                                style="width: {{ weights.certifications_weight }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Required Skills -->
+                                <div class="flex items-center space-x-2 p-2 rounded hover:bg-blue-50 transition-colors">
+                                    <div
+                                        class="w-6 h-6 bg-blue-100 rounded flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-tools text-blue-600 text-xs"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between mb-0.5">
+                                            <div>
+                                                <span class="text-sm font-medium text-gray-700">Required Skills</span>
+                                                <span class="text-xs text-gray-500 block">Core competencies</span>
+                                            </div>
+                                            <span class="text-sm font-bold text-gray-900">{{
+                                                weights.required_skills_weight }}%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-1">
+                                            <div class="bg-blue-600 h-1 rounded-full transition-all duration-500"
+                                                style="width: {{ weights.required_skills_weight }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Optional Skills -->
+                                <div class="flex items-center space-x-2 p-2 rounded hover:bg-blue-50 transition-colors">
+                                    <div
+                                        class="w-6 h-6 bg-blue-100 rounded flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-star text-blue-600 text-xs"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center justify-between mb-0.5">
+                                            <div>
+                                                <span class="text-sm font-medium text-gray-700">Optional Skills</span>
+                                                <span class="text-xs text-gray-500 block">Additional competencies</span>
+                                            </div>
+                                            <span class="text-sm font-bold text-gray-900">{{
+                                                weights.optional_skills_weight }}%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 rounded-full h-1">
+                                            <div class="bg-blue-600 h-1 rounded-full transition-all duration-500"
+                                                style="width: {{ weights.optional_skills_weight }}%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Total Indicator -->
+                            <div class="mt-3 pt-3 border-t border-gray-200">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        {% set total_weight = weights.education_weight + weights.experience_weight +
+                                        weights.projects_weight + weights.certifications_weight +
+                                        weights.required_skills_weight + weights.optional_skills_weight %}
+                                        <i class="fas fa-info-circle text-blue-600 text-xs"></i>
+                                        <span class="text-sm text-gray-700">Total: {{ total_weight }}%</span>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <span class="text-sm font-medium text-gray-900">{{ total_weight }}%</span>
+                                        {% if total_weight == 100 %}
+                                        <div class="flex items-center space-x-1 text-blue-600">
+                                            <i class="fas fa-check-circle text-xs"></i>
+                                            <span class="text-sm font-medium">Balanced</span>
+                                        </div>
+                                        {% else %}
+                                        <div class="flex items-center space-x-1 text-amber-600">
+                                            <i class="fas fa-exclamation-triangle text-xs"></i>
+                                            <span class="text-sm font-medium">Unbalanced</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <!-- Ultra-Compact Empty State -->
+                            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
+                                <div
+                                    class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                    <i class="fas fa-balance-scale text-blue-600 text-xs"></i>
+                                </div>
+                                <h4 class="text-sm font-medium text-gray-900 mb-1">No Weights Set</h4>
+                                <p class="text-xs text-gray-600 mb-3">Configure scoring criteria for evaluation</p>
+                                <button
+                                    class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-plus mr-1"></i>
+                                    Set Weights
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Charts Section -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            <!-- Applicants Over Time -->
+                            <div class="lg:col-span-2">
+                                <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-calendar-alt mr-2 text-gray-400"></i> Applicants Over Time
+                                </h3>
+                                <div class="relative h-64">
+                                    <canvas id="applicantsOverTimeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            <!-- Status Distribution -->
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-tasks mr-2 text-gray-400"></i> Application Status Distribution
+                                </h3>
+                                <div class="relative h-64">
+                                    <canvas id="statusDistributionChart"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Experience Level -->
+                            <div>
+                                <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-layer-group mr-2 text-gray-400"></i> Applicant Experience Level
+                                </h3>
+                                <div class="flex items-center space-x-6">
+                                    <div class="relative h-64 w-64">
+                                        <canvas id="experienceLevelChart"></canvas>
+                                    </div>
+                                    <div class="flex-1 space-y-2">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 bg-blue-900 rounded-full"></div>
+                                                <span class="text-sm text-gray-700">Mid-level</span>
+                                            </div>
+                                            <span class="text-sm font-semibold text-gray-900">35% (8)</span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 bg-blue-600 rounded-full"></div>
+                                                <span class="text-sm text-gray-700">Senior</span>
+                                            </div>
+                                            <span class="text-sm font-semibold text-gray-900">30% (7)</span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 bg-blue-400 rounded-full"></div>
+                                                <span class="text-sm text-gray-700">Junior</span>
+                                            </div>
+                                            <span class="text-sm font-semibold text-gray-900">15% (4)</span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 bg-blue-200 rounded-full"></div>
+                                                <span class="text-sm text-gray-700">Lead</span>
+                                            </div>
+                                            <span class="text-sm font-semibold text-gray-900">8% (2)</span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 bg-blue-100 rounded-full"></div>
+                                                <span class="text-sm text-gray-700">Entry</span>
+                                            </div>
+                                            <span class="text-sm font-semibold text-gray-900">10% (2)</span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-3 h-3 bg-gray-100 rounded-full border border-gray-300">
+                                                </div>
+                                                <span class="text-sm text-gray-700">Principal</span>
+                                            </div>
+                                            <span class="text-sm font-semibold text-gray-900">2% (1)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Top Applicants -->
+                        <div>
+                            <h3 class="text-base font-semibold text-gray-900 mb-6 flex items-center">
+                                <i class="fas fa-trophy mr-2 text-gray-400"></i> Top Applicants
+                            </h3>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th
+                                                class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Rank</th>
+                                            <th
+                                                class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Applicant</th>
+                                            <th
+                                                class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Match</th>
+                                            <th
+                                                class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Position Fit</th>
+                                            <th
+                                                class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Skills Fit</th>
+                                            <th
+                                                class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr class="hover:bg-gray-50">
+                                            <td
+                                                class="px-4 py-3 whitespace-nowrap text-center text-sm font-bold text-gray-900">
+                                                <span
+                                                    class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-600">1</span>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">Andi Pratama S.Kom.</p>
+                                                    <p class="text-xs text-gray-500">Senior</p>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">
+                                                95%</td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">
+                                                98%</td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">
+                                                92%</td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-center"><span
+                                                    class="badge badge-status-shortlisted">Shortlisted</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td
+                                                class="px-4 py-3 whitespace-nowrap text-center text-sm font-bold text-gray-900">
+                                                <span
+                                                    class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-600">2</span>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">Siti Wijaya M.Eng.</p>
+                                                    <p class="text-xs text-gray-500">Mid-level</p>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">
+                                                92%</td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">
+                                                95%</td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">
+                                                88%</td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-center"><span
+                                                    class="badge badge-status-shortlisted">Shortlisted</span></td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50">
+                                            <td
+                                                class="px-4 py-3 whitespace-nowrap text-center text-sm font-bold text-gray-900">
+                                                <span
+                                                    class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-600">3</span>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">Citra Lestari S.H.</p>
+                                                    <p class="text-xs text-gray-500">Junior</p>
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">
+                                                88%</td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">
+                                                90%</td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">
+                                                85%</td>
+                                            <td class="px-4 py-3 whitespace-nowrap text-center"><span
+                                                    class="badge badge-status-accepted">Accepted</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Applicants Tab -->
+                    <div id="applicants-tab" class="tab-content">
+                        <!-- Applicants Header -->
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">All Applicants ({{
+                                    vacancy.num_applicants if vacancy else 0 }})</h3>
+                                <p class="text-sm text-gray-600">Manage and review all applications for this position
+                                </p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <select
+                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>All Status</option>
+                                    <option>New</option>
+                                    <option>Reviewing</option>
+                                    <option>Shortlisted</option>
+                                    <option>Rejected</option>
+                                </select>
+                                <button
+                                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                    <i class="fas fa-download mr-2"></i>Export
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Applicants List -->
+                        <div class="space-y-4">
+                            <!-- Applicant 1 -->
+                            <div class="applicant-card bg-white rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4">
+                                        <img src="https://picsum.photos/seed/applicant1/50/50.jpg" alt="Applicant"
+                                            class="w-12 h-12 rounded-full">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">John Anderson</h4>
+                                            <p class="text-sm text-gray-600">john.anderson@email.com • San Francisco, CA
+                                            </p>
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <span class="text-xs text-gray-500">Applied 2 days ago</span>
+                                                <span class="text-xs text-gray-400">•</span>
+                                                <span class="text-xs text-gray-500">8 years experience</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="badge badge-status-shortlisted">Shortlisted</span>
+                                        <button class="action-btn view-details" title="View Profile">
+                                            <i class="fas fa-eye"></i>
+                                            <span class="tooltip">View Profile</span>
+                                        </button>
+                                        <button class="action-btn toggle-status" title="Shortlist">
+                                            <i class="fas fa-star"></i>
+                                            <span class="tooltip">Shortlist</span>
+                                        </button>
+                                        <button class="action-btn delete" title="Reject">
+                                            <i class="fas fa-times"></i>
+                                            <span class="tooltip">Reject</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Applicant 2 -->
+                            <div class="applicant-card bg-white rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4">
+                                        <img src="https://picsum.photos/seed/applicant2/50/50.jpg" alt="Applicant"
+                                            class="w-12 h-12 rounded-full">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Sarah Mitchell</h4>
+                                            <p class="text-sm text-gray-600">sarah.mitchell@email.com • New York, NY</p>
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <span class="text-xs text-gray-500">Applied 5 days ago</span>
+                                                <span class="text-xs text-gray-400">•</span>
+                                                <span class="text-xs text-gray-500">6 years experience</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="badge badge-status-accepted">Accepted</span>
+                                        <button class="action-btn view-details" title="View Profile">
+                                            <i class="fas fa-eye"></i>
+                                            <span class="tooltip">View Profile</span>
+                                        </button>
+                                        <button class="action-btn toggle-status" title="Schedule Interview">
+                                            <i class="fas fa-calendar"></i>
+                                            <span class="tooltip">Schedule Interview</span>
+                                        </button>
+                                        <button class="action-btn delete" title="Reject">
+                                            <i class="fas fa-times"></i>
+                                            <span class="tooltip">Reject</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Applicant 3 -->
+                            <div class="applicant-card bg-white rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4">
+                                        <img src="https://picsum.photos/seed/applicant3/50/50.jpg" alt="Applicant"
+                                            class="w-12 h-12 rounded-full">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Michael Chen</h4>
+                                            <p class="text-sm text-gray-600">michael.chen@email.com • Seattle, WA</p>
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <span class="text-xs text-gray-500">Applied 1 week ago</span>
+                                                <span class="text-xs text-gray-400">•</span>
+                                                <span class="text-xs text-gray-500">10 years experience</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="badge badge-status-pending">New</span>
+                                        <button class="action-btn view-details" title="View Profile">
+                                            <i class="fas fa-eye"></i>
+                                            <span class="tooltip">View Profile</span>
+                                        </button>
+                                        <button class="action-btn toggle-status" title="Shortlist">
+                                            <i class="fas fa-star"></i>
+                                            <span class="tooltip">Shortlist</span>
+                                        </button>
+                                        <button class="action-btn delete" title="Reject">
+                                            <i class="fas fa-times"></i>
+                                            <span class="tooltip">Reject</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Applicant 4 -->
+                            <div class="applicant-card bg-white rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center space-x-4">
+                                        <img src="https://picsum.photos/seed/applicant4/50/50.jpg" alt="Applicant"
+                                            class="w-12 h-12 rounded-full">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">Emily Rodriguez</h4>
+                                            <p class="text-sm text-gray-600">emily.rodriguez@email.com • Austin, TX</p>
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <span class="text-xs text-gray-500">Applied 2 weeks ago</span>
+                                                <span class="text-xs text-gray-400">•</span>
+                                                <span class="text-xs text-gray-500">4 years experience</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <span class="badge badge-status-rejected">Rejected</span>
+                                        <button class="action-btn view-details" title="View Profile">
+                                            <i class="fas fa-eye"></i>
+                                            <span class="tooltip">View Profile</span>
+                                        </button>
+                                        <button class="action-btn toggle-status" title="Reconsider">
+                                            <i class="fas fa-undo"></i>
+                                            <span class="tooltip">Reconsider</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- More applicants placeholder -->
+                            <div class="text-center py-4">
+                                <button class="text-blue-600 hover:text-blue-700 font-medium text-sm">
+                                    Load More Applicants <i class="fas fa-chevron-down ml-1"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </main>
+
+    <!-- Weights Configuration Modal -->
+    <div id="weightsModal" class="fixed inset-0 z-50 hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 transition-all duration-300" onclick="closeWeightsModal()"></div>
+
+        <!-- Modal Container -->
+        <div class="relative flex items-center justify-center min-h-screen p-4">
+            <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col transform transition-all duration-300 scale-95 opacity-0"
+                id="modalContent">
+
+                <!-- Compact Header -->
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 flex-shrink-0 rounded-t-3xl">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <div class="bg-white/10 backdrop-blur-sm p-1.5 rounded-full">
+                                <i class="fas fa-sliders-h text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white">Configure Scoring Weights</h3>
+                                <p class="text-blue-100 text-xs">Adjust weights for candidate evaluation</p>
+                            </div>
+                        </div>
+                        <button onclick="closeWeightsModal()"
+                            class="bg-white/10 hover:bg-white/20 text-white p-1.5 rounded-full transition-all duration-200">
+                            <i class="fas fa-times text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Compact Content -->
+                <div class="p-4 overflow-y-auto flex-1 bg-gray-50">
+                    <!-- Validation Status -->
+                    <div class="bg-white rounded-2xl p-3 border border-gray-200 shadow-sm mb-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Total weights must equal 100%</span>
+                            <span id="totalWeightDisplay" class="font-bold text-blue-600">100%</span>
+                        </div>
+                        <div id="weightValidation"
+                            class="hidden mt-2 p-2 bg-red-50 border border-red-200 rounded-2xl text-sm text-red-600">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            Total must be 100% (currently <span id="currentTotal">0</span>%)
+                        </div>
+                    </div>
+
+                    <!-- Weight Items Grid -->
+                    <div class="bg-white rounded-2xl p-3 border border-gray-200 shadow-sm">
+                        <h4 class="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                            <i class="fas fa-balance-scale text-blue-500 mr-2 text-xs"></i>
+                            Scoring Criteria
+                        </h4>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <!-- Education -->
+                            <div class="flex flex-col space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-graduation-cap text-blue-500 mr-2 text-xs"></i>
+                                        <span class="text-sm font-medium text-gray-700">Education</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button class="weight-btn-minus rounded-full" data-target="educationWeight">
+                                            <i class="fas fa-minus text-xs"></i>
+                                        </button>
+                                        <input type="number" id="educationWeight" class="weight-input rounded-lg"
+                                            min="0" max="100" value="{{ weights.education_weight if weights else 20 }}">
+                                        <button class="weight-btn-plus rounded-full" data-target="educationWeight">
+                                            <i class="fas fa-plus text-xs"></i>
+                                        </button>
+                                        <span class="weight-badge rounded-full">{{ weights.education_weight if weights
+                                            else 20 }}%</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-500"
+                                            id="educationWeightBar"
+                                            style="width: {{ weights.education_weight if weights else 20 }}%"></div>
+                                    </div>
+                                    <input type="range" id="educationWeightSlider" class="weight-slider rounded-full"
+                                        min="0" max="100" value="{{ weights.education_weight if weights else 20 }}">
+                                </div>
+                            </div>
+
+                            <!-- Experience -->
+                            <div class="flex flex-col space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-briefcase text-green-500 mr-2 text-xs"></i>
+                                        <span class="text-sm font-medium text-gray-700">Experience</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button class="weight-btn-minus rounded-full" data-target="experienceWeight">
+                                            <i class="fas fa-minus text-xs"></i>
+                                        </button>
+                                        <input type="number" id="experienceWeight" class="weight-input rounded-lg"
+                                            min="0" max="100"
+                                            value="{{ weights.experience_weight if weights else 25 }}">
+                                        <button class="weight-btn-plus rounded-full" data-target="experienceWeight">
+                                            <i class="fas fa-plus text-xs"></i>
+                                        </button>
+                                        <span class="weight-badge rounded-full">{{ weights.experience_weight if weights
+                                            else 25 }}%</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-1.5 rounded-full transition-all duration-500"
+                                            id="experienceWeightBar"
+                                            style="width: {{ weights.experience_weight if weights else 25 }}%"></div>
+                                    </div>
+                                    <input type="range" id="experienceWeightSlider" class="weight-slider rounded-full"
+                                        min="0" max="100" value="{{ weights.experience_weight if weights else 25 }}">
+                                </div>
+                            </div>
+
+                            <!-- Projects -->
+                            <div class="flex flex-col space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-project-diagram text-purple-500 mr-2 text-xs"></i>
+                                        <span class="text-sm font-medium text-gray-700">Projects</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button class="weight-btn-minus rounded-full" data-target="projectsWeight">
+                                            <i class="fas fa-minus text-xs"></i>
+                                        </button>
+                                        <input type="number" id="projectsWeight" class="weight-input rounded-lg" min="0"
+                                            max="100" value="{{ weights.projects_weight if weights else 15 }}">
+                                        <button class="weight-btn-plus rounded-full" data-target="projectsWeight">
+                                            <i class="fas fa-plus text-xs"></i>
+                                        </button>
+                                        <span class="weight-badge rounded-full">{{ weights.projects_weight if weights
+                                            else 15 }}%</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-1.5 rounded-full transition-all duration-500"
+                                            id="projectsWeightBar"
+                                            style="width: {{ weights.projects_weight if weights else 15 }}%"></div>
+                                    </div>
+                                    <input type="range" id="projectsWeightSlider" class="weight-slider rounded-full"
+                                        min="0" max="100" value="{{ weights.projects_weight if weights else 15 }}">
+                                </div>
+                            </div>
+
+                            <!-- Certifications -->
+                            <div class="flex flex-col space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-certificate text-amber-500 mr-2 text-xs"></i>
+                                        <span class="text-sm font-medium text-gray-700">Certifications</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button class="weight-btn-minus rounded-full"
+                                            data-target="certificationsWeight">
+                                            <i class="fas fa-minus text-xs"></i>
+                                        </button>
+                                        <input type="number" id="certificationsWeight" class="weight-input rounded-lg"
+                                            min="0" max="100"
+                                            value="{{ weights.certifications_weight if weights else 15 }}">
+                                        <button class="weight-btn-plus rounded-full" data-target="certificationsWeight">
+                                            <i class="fas fa-plus text-xs"></i>
+                                        </button>
+                                        <span class="weight-badge rounded-full">{{ weights.certifications_weight if
+                                            weights else 15 }}%</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-gradient-to-r from-amber-500 to-orange-500 h-1.5 rounded-full transition-all duration-500"
+                                            id="certificationsWeightBar"
+                                            style="width: {{ weights.certifications_weight if weights else 15 }}%">
+                                        </div>
+                                    </div>
+                                    <input type="range" id="certificationsWeightSlider"
+                                        class="weight-slider rounded-full" min="0" max="100"
+                                        value="{{ weights.certifications_weight if weights else 15 }}">
+                                </div>
+                            </div>
+
+                            <!-- Required Skills -->
+                            <div class="flex flex-col space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-tools text-red-500 mr-2 text-xs"></i>
+                                        <span class="text-sm font-medium text-gray-700">Required Skills</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button class="weight-btn-minus rounded-full"
+                                            data-target="requiredSkillsWeight">
+                                            <i class="fas fa-minus text-xs"></i>
+                                        </button>
+                                        <input type="number" id="requiredSkillsWeight" class="weight-input rounded-lg"
+                                            min="0" max="100"
+                                            value="{{ weights.required_skills_weight if weights else 15 }}">
+                                        <button class="weight-btn-plus rounded-full" data-target="requiredSkillsWeight">
+                                            <i class="fas fa-plus text-xs"></i>
+                                        </button>
+                                        <span class="weight-badge rounded-full">{{ weights.required_skills_weight if
+                                            weights else 15 }}%</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-gradient-to-r from-indigo-500 to-blue-500 h-1.5 rounded-full transition-all duration-500"
+                                            id="requiredSkillsWeightBar"
+                                            style="width: {{ weights.required_skills_weight if weights else 15 }}%">
+                                        </div>
+                                    </div>
+                                    <input type="range" id="requiredSkillsWeightSlider"
+                                        class="weight-slider rounded-full" min="0" max="100"
+                                        value="{{ weights.required_skills_weight if weights else 15 }}">
+                                </div>
+                            </div>
+
+                            <!-- Optional Skills -->
+                            <div class="flex flex-col space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-star text-teal-500 mr-2 text-xs"></i>
+                                        <span class="text-sm font-medium text-gray-700">Optional Skills</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button class="weight-btn-minus rounded-full"
+                                            data-target="optionalSkillsWeight">
+                                            <i class="fas fa-minus text-xs"></i>
+                                        </button>
+                                        <input type="number" id="optionalSkillsWeight" class="weight-input rounded-lg"
+                                            min="0" max="100"
+                                            value="{{ weights.optional_skills_weight if weights else 10 }}">
+                                        <button class="weight-btn-plus rounded-full" data-target="optionalSkillsWeight">
+                                            <i class="fas fa-plus text-xs"></i>
+                                        </button>
+                                        <span class="weight-badge rounded-full">{{ weights.optional_skills_weight if
+                                            weights else 10 }}%</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-1.5">
+                                        <div class="bg-gradient-to-r from-teal-500 to-green-500 h-1.5 rounded-full transition-all duration-500"
+                                            id="optionalSkillsWeightBar"
+                                            style="width: {{ weights.optional_skills_weight if weights else 10 }}%">
+                                        </div>
+                                    </div>
+                                    <input type="range" id="optionalSkillsWeightSlider"
+                                        class="weight-slider rounded-full" min="0" max="100"
+                                        value="{{ weights.optional_skills_weight if weights else 10 }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Compact Footer -->
+                <div
+                    class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-t border-gray-200 flex-shrink-0 rounded-b-3xl">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2 text-xs text-gray-600">
+                            <i class="fas fa-info-circle text-blue-500"></i>
+                            <span>Weights must total 100% for balanced scoring</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="resetWeights()"
+                                class="modal-button px-3 py-1.5 bg-white hover:bg-gray-50 text-gray-700 rounded-2xl border border-gray-300 transition-all duration-200 flex items-center space-x-1 text-xs shadow-sm hover:shadow">
+                                <i class="fas fa-undo"></i>
+                                <span>Reset</span>
+                            </button>
+                            <button onclick="saveWeights()"
+                                class="modal-button px-3 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-2xl transition-all duration-200 flex items-center space-x-1 text-xs font-medium shadow-sm hover:shadow">
+                                <i class="fas fa-save"></i>
+                                <span>Save</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Chart.js Instances ---
+        let applicantsOverTimeChart, statusDistributionChart, experienceLevelChart;
+
+        // --- Data for Charts ---
+        const chartData = {
+            applicantsOverTime: {
+                labels: ['Nov 18', 'Nov 20', 'Nov 22', 'Nov 24', 'Nov 26', 'Nov 28', 'Nov 30'],
+                data: [2, 4, 3, 8, 5, 2, 0]
+            },
+            statusDistribution: {
+                labels: ['Pending', 'Processed', 'Shortlisted', 'Rejected', 'Accepted'],
+                data: [8, 5, 4, 6, 1]
+            },
+            experienceLevel: {
+                labels: ['Mid-level', 'Senior', 'Junior', 'Lead', 'Entry', 'Principal'],
+                data: [8, 7, 4, 2, 2, 1]
+            }
+        };
+
+        // --- Chart.js Configurations ---
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#ddd',
+                    borderWidth: 1,
+                    padding: 10,
+                    displayColors: true,
+                }
+            }
+        };
+
+        // --- Initialize Charts on Page Load ---
+        window.addEventListener('load', function () {
+            // Hide loading screen after 1 second
+            setTimeout(function () {
+                const loadingScreen = document.getElementById('loadingScreen');
+                loadingScreen.style.opacity = '0';
+                setTimeout(function () {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 1000);
+
+            // Initialize Applicants Over Time Chart
+            const ctxTime = document.getElementById('applicantsOverTimeChart').getContext('2d');
+            applicantsOverTimeChart = new Chart(ctxTime, {
+                type: 'line',
+                data: {
+                    labels: chartData.applicantsOverTime.labels,
+                    datasets: [{
+                        label: 'Number of Applicants',
+                        data: chartData.applicantsOverTime.data,
+                        fill: true,
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        tension: 0.3,
+                        pointBackgroundColor: '#3b82f6',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#3b82f6',
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#e5e7eb',
+                                borderDash: [2, 2],
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Initialize Status Distribution Chart
+            const ctxStatus = document.getElementById('statusDistributionChart').getContext('2d');
+            statusDistributionChart = new Chart(ctxStatus, {
+                type: 'bar',
+                data: {
+                    labels: chartData.statusDistribution.labels,
+                    datasets: [{
+                        label: 'Number of Applicants',
+                        data: chartData.statusDistribution.data,
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)', // Pending - Blue
+                            'rgba(59, 130, 246, 0.8)', // Processed - Darker Blue
+                            'rgba(79, 70, 229, 0.9)', // Shortlisted - Indigo
+                            'rgba(107, 114, 128, 0.7)', // Rejected - Gray
+                            'rgba(34, 197, 94, 0.9)'  // Accepted - Green
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(79, 70, 229, 1)',
+                            'rgba(107, 114, 128, 1)',
+                            'rgba(34, 197, 94, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    indexAxis: 'y',
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                display: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: true,
+                                color: '#e5e7eb',
+                                borderDash: [2, 2],
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Initialize Experience Level Chart
+            const ctxExperience = document.getElementById('experienceLevelChart').getContext('2d');
+            experienceLevelChart = new Chart(ctxExperience, {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.experienceLevel.labels,
+                    datasets: [{
+                        data: chartData.experienceLevel.data,
+                        backgroundColor: [
+                            '#1e3a8a', // Mid-level
+                            '#2563eb', // Senior
+                            '#60a5fa', // Junior
+                            '#93c5fd', // Lead
+                            '#dbeafe', // Entry
+                            '#f3f4f6'  // Principal
+                        ],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    const value = context.parsed;
+                                    label += value + ' applicants';
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = themeToggle.querySelector('i');
+        const body = document.body;
+
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        if (currentTheme === 'dark') {
+            body.classList.add('dark');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark');
+            if (body.classList.contains('dark')) {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Tab Switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+
+            // Add active class to clicked button
+            event.target.closest('.tab-button').classList.add('active');
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function toggleDropdown() {
+            const dropdown = document.getElementById('actionsDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // --- Print Functions (without external library) ---
+        function printFullPage() {
+            // Close dropdown first
+            document.getElementById('actionsDropdown').classList.add('hidden');
+
+            // Remove print-area class from all elements
+            document.querySelectorAll('.print-area').forEach(el => {
+                el.classList.remove('print-area');
+            });
+
+            // Add print-area class to main content
+            document.querySelector('main').classList.add('print-area');
+
+            // Trigger print dialog
+            window.print();
+        }
+
+        function printVacancyDetails() {
+            // Close dropdown first
+            document.getElementById('actionsDropdown').classList.add('hidden');
+
+            // Remove print-area class from all elements
+            document.querySelectorAll('.print-area').forEach(el => {
+                el.classList.remove('print-area');
+            });
+
+            // Add print-area class to vacancy details
+            document.getElementById('vacancyDetailsContainer').classList.add('print-area');
+
+            // Trigger print dialog
+            window.print();
+        }
+
+        function printStatistics() {
+            // Close dropdown first
+            document.getElementById('actionsDropdown').classList.add('hidden');
+
+            // Remove print-area class from all elements
+            document.querySelectorAll('.print-area').forEach(el => {
+                el.classList.remove('print-area');
+            });
+
+            // Add print-area class to statistics
+            document.getElementById('statistics-tab').classList.add('print-area');
+
+            // Trigger print dialog
+            window.print();
+        }
+
+        // --- Weights Modal Functions ---
+        function openWeightsModal() {
+            console.log('Opening modal'); // Debug log
+            const modal = document.getElementById('weightsModal');
+            modal.classList.remove('hidden');
+
+            // Animate modal appearance
+            setTimeout(() => {
+                document.getElementById('modalContent').classList.remove('scale-95', 'opacity-0');
+                document.getElementById('modalContent').classList.add('scale-100', 'opacity-100');
+            }, 10);
+
+            updateTotalWeight();
+            syncSlidersAndInputs();
+        }
+
+        function closeWeightsModal() {
+            console.log('Closing modal'); // Debug log
+
+            // Animate modal disappearance
+            document.getElementById('modalContent').classList.remove('scale-100', 'opacity-100');
+            document.getElementById('modalContent').classList.add('scale-95', 'opacity-0');
+
+            setTimeout(() => {
+                document.getElementById('weightsModal').classList.add('hidden');
+            }, 300);
+        }
+
+        function syncSlidersAndInputs() {
+            // Sync all sliders with their corresponding inputs
+            const weightIds = ['education', 'experience', 'projects', 'certifications', 'requiredSkills', 'optionalSkills'];
+
+            weightIds.forEach(id => {
+                const input = document.getElementById(id + 'Weight');
+                const slider = document.getElementById(id + 'WeightSlider');
+                const badge = input.parentElement.querySelector('.weight-badge');
+                const bar = document.getElementById(id + 'WeightBar');
+
+                // Sync input with slider
+                input.addEventListener('input', function () {
+                    slider.value = this.value;
+                    badge.textContent = this.value + '%';
+                    if (bar) bar.style.width = this.value + '%';
+                    updateTotalWeight();
+                });
+
+                // Sync slider with input
+                slider.addEventListener('input', function () {
+                    input.value = this.value;
+                    badge.textContent = this.value + '%';
+                    if (bar) bar.style.width = this.value + '%';
+                    updateTotalWeight();
+                });
+
+                // Sync +/- buttons with input and slider
+                const minusBtn = input.parentElement.querySelector('.weight-btn-minus');
+                const plusBtn = input.parentElement.querySelector('.weight-btn-plus');
+
+                minusBtn.addEventListener('click', function () {
+                    const currentValue = parseInt(input.value);
+                    if (currentValue > 0) {
+                        input.value = currentValue - 1;
+                        slider.value = currentValue - 1;
+                        badge.textContent = (currentValue - 1) + '%';
+                        if (bar) bar.style.width = (currentValue - 1) + '%';
+                        updateTotalWeight();
+                    }
+                });
+
+                plusBtn.addEventListener('click', function () {
+                    const currentValue = parseInt(input.value);
+                    if (currentValue < 100) {
+                        input.value = currentValue + 1;
+                        slider.value = currentValue + 1;
+                        badge.textContent = (currentValue + 1) + '%';
+                        if (bar) bar.style.width = (currentValue + 1) + '%';
+                        updateTotalWeight();
+                    }
+                });
+            });
+        }
+
+        function updateTotalWeight() {
+            const educationWeight = document.getElementById('educationWeight').value;
+            const experienceWeight = document.getElementById('experienceWeight').value;
+            const projectsWeight = document.getElementById('projectsWeight').value;
+            const certificationsWeight = document.getElementById('certificationsWeight').value;
+            const requiredSkillsWeight = document.getElementById('requiredSkillsWeight').value;
+            const optionalSkillsWeight = document.getElementById('optionalSkillsWeight').value;
+
+            const totalWeight = parseInt(educationWeight) + parseInt(experienceWeight) + parseInt(projectsWeight) +
+                parseInt(certificationsWeight) + parseInt(requiredSkillsWeight) + parseInt(optionalSkillsWeight);
+
+            document.getElementById('totalWeightDisplay').textContent = `${totalWeight}%`;
+            document.getElementById('currentTotal').textContent = totalWeight;
+
+            // Update total display color
+            const totalDisplay = document.getElementById('totalWeightDisplay');
+            if (totalWeight === 100) {
+                totalDisplay.className = 'font-bold text-green-600';
+            } else {
+                totalDisplay.className = 'font-bold text-red-600';
+            }
+
+            // Show validation message if total is not 100%
+            const validationDiv = document.getElementById('weightValidation');
+            const saveButton = document.querySelector('.modal-button:last-child');
+
+            if (totalWeight !== 100) {
+                validationDiv.classList.remove('hidden');
+                saveButton.disabled = true;
+            } else {
+                validationDiv.classList.add('hidden');
+                saveButton.disabled = false;
+            }
+        }
+
+        function resetWeights() {
+            const defaultValues = {
+                education: 20,
+                experience: 25,
+                projects: 15,
+                certifications: 15,
+                requiredSkills: 15,
+                optionalSkills: 10
+            };
+
+            Object.keys(defaultValues).forEach(key => {
+                const input = document.getElementById(key + 'Weight');
+                const slider = document.getElementById(key + 'WeightSlider');
+                const badge = input.parentElement.querySelector('.weight-badge');
+                const bar = document.getElementById(key + 'WeightBar');
+
+                input.value = defaultValues[key];
+                slider.value = defaultValues[key];
+                badge.textContent = defaultValues[key] + '%';
+                if (bar) bar.style.width = defaultValues[key] + '%';
+            });
+
+            updateTotalWeight();
+        }
+
+        function saveWeights() {
+            const weights = {
+                education_weight: document.getElementById('educationWeight').value,
+                experience_weight: document.getElementById('experienceWeight').value,
+                projects_weight: document.getElementById('projectsWeight').value,
+                certifications_weight: document.getElementById('certificationsWeight').value,
+                required_skills_weight: document.getElementById('requiredSkillsWeight').value,
+                optional_skills_weight: document.getElementById('optionalSkillsWeight').value
+            };
+
+            const totalWeight = Object.values(weights).reduce((sum, val) => sum + parseInt(val), 0);
+
+            if (totalWeight === 100) {
+                // Here you would normally send this data to the server
+                showToast('Scoring weights saved successfully!', 'success');
+                closeWeightsModal();
+            } else {
+                showToast('Total weights must equal 100%', 'error');
+            }
+        }
+
+        // --- Initialize Weight Controls ---
+        document.addEventListener('DOMContentLoaded', function () {
+            // Sync sliders and inputs
+            syncSlidersAndInputs();
+
+            // Add event listeners to modal buttons
+            document.getElementById('configureWeightsBtn').addEventListener('click', openWeightsModal);
+        });
+    </script>
+    <!-- Toast Notification -->
+    <div id="toast"
+        class="fixed bottom-4 right-4 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-full transition-transform duration-300 flex items-center space-x-2">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Success!</span>
+    </div>
+</body>
+
+</html>
