@@ -5,7 +5,28 @@ from sqlalchemy.orm import relationship
 from backend.app.database import Base
 from sqlalchemy.sql import func
 from sqlalchemy import event, text
+from sqlalchemy.orm import column_property
+from sqlalchemy import select, func
 
+
+class Candidate(Base):
+    __tablename__ = "candidate"
+    id = Column(Integer, primary_key=True, index=True)
+    full_name = Column(Text, nullable=False)
+    email = Column(Text, nullable=False)
+    phone = Column(Text)
+    portfolio_link = Column(Text)
+    vacancy_id = Column(String, ForeignKey("vacancy.id"))
+    experience_years = Column(Text)
+    cv_filepath = Column(Text)
+    expected_salary = Column(Integer)
+    additional_info = Column(Text)
+    status = Column(Text, default="pending")
+    extracted_text = Column(Text)
+    submission_date = Column(TIMESTAMP, server_default=func.now())
+    vacancy = relationship("Vacancy", back_populates="candidates")
+    
+    
 class Vacancy(Base):
     __tablename__ = "vacancy"
     seq_id = Column(Integer, Sequence('job_vacancy_seq', start=1, increment=1), primary_key=True)
@@ -24,6 +45,11 @@ class Vacancy(Base):
     application_deadline = Column(TIMESTAMP)
     max_applicants = Column(Integer)
     posting_date = Column(TIMESTAMP, server_default=func.now())
+    num_applicants = column_property(
+        select(func.count(Candidate.id))
+        .where(Candidate.vacancy_id == id)
+        .correlate_except(Candidate)
+    )
 
     # Relationships
     candidates = relationship("Candidate", back_populates="vacancy")
@@ -105,21 +131,3 @@ class Weight(Base):
     required_skills_weight = Column(Integer, nullable=False, default=30)
     optional_skills_weight = Column(Integer, nullable=False, default=0)
     vacancy = relationship("Vacancy", back_populates="weight")
-
-
-class Candidate(Base):
-    __tablename__ = "candidate"
-    id = Column(Integer, primary_key=True, index=True)
-    full_name = Column(Text, nullable=False)
-    email = Column(Text, nullable=False)
-    phone = Column(Text)
-    portfolio_link = Column(Text)
-    vacancy_id = Column(String, ForeignKey("vacancy.id"))
-    experience_years = Column(Text)
-    cv_filepath = Column(Text)
-    expected_salary = Column(Integer)
-    additional_info = Column(Text)
-    status = Column(Text, default="pending")
-    extracted_text = Column(Text)
-    submission_date = Column(TIMESTAMP, server_default=func.now())
-    vacancy = relationship("Vacancy", back_populates="candidates")
