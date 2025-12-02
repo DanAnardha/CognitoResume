@@ -7,6 +7,7 @@ from sqlalchemy.sql import func
 from sqlalchemy import event, text
 from sqlalchemy.orm import column_property
 from sqlalchemy import select, func
+from nanoid import generate
 
 
 class Candidate(Base):
@@ -31,6 +32,7 @@ class Vacancy(Base):
     __tablename__ = "vacancy"
     seq_id = Column(Integer, Sequence('job_vacancy_seq', start=1, increment=1), primary_key=True)
     id = Column(String, unique=True, index=True, nullable=False)
+    public_id = Column(String(16), unique=True, index=True, nullable=False)
     job_position = Column(Text, nullable=False)
     job_description = Column(Text, nullable=False)
     department = Column(Text, nullable=False)
@@ -65,6 +67,9 @@ class Vacancy(Base):
             result = connection.execute(text("SELECT nextval('job_vacancy_seq')"))
             seq_number = result.scalar()
             target.id = f"VAC-{seq_number:05d}"
+        
+        if not target.public_id:
+            target.public_id = generate(size=12)
             
     def to_dict(self):
         return {
