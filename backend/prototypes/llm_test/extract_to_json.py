@@ -196,8 +196,8 @@ def _make_hashable(value: Any, case_sensitive: bool = True) -> Union[Tuple, str,
         return value if case_sensitive else value.lower()
     return value
 
-def clean_resume_data(resume_data: Dict[str, Any]) -> Dict[str, Any]:
-    """Specialized function for cleaning resume data while preserving structure."""
+def local_structural_cleaning(resume_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Specialized function for initial cleaning of resume data while preserving structure."""
     # First pass: normalize with structure preservation
     normalized = normalize_json_preserve_structure(resume_data)
     
@@ -262,7 +262,7 @@ def stage1_extraction(api_config: Dict, prompts_config: Dict, chunks: List[str])
     extraction_rules = """
     3. Work Experience must follow strict definitions and include ONLY real employment.
        - "role": the official job title.
-       - "company": name of the employer.
+       - "company": the name of the employer.
        - "description": a summary of responsibilities and achievements.
        - "years": the period of employment (e.g., "2020-2023").
     4. Projects must follow strict definitions and include ONLY actual projects.
@@ -393,6 +393,56 @@ def stage2_post_processing(api_config: Dict, prompts_config: Dict, initial_data:
     final_result = parse_llm_response(response_text)
     return final_result
 
+# --- Final Validation and Cleaning Function ---
+
+def final_validation_and_cleaning(data: Dict[str, Any], schema: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    A final deterministic step to ensure the data perfectly matches the schema.
+    This acts as a safety net after the LLM's semantic cleaning.
+    """
+    print("\n--- Starting Final Validation and Structural Cleaning ---")
+    # Create a deep copy of the schema to ensure all keys exist
+    final_data = json.loads(json.dumps(schema))
+
+    # Helper to validate and round confidence scores
+    def validate_confidence(conf_val: Any) -> float:
+        try:
+            return round(float(conf_val), 2)
+        except (ValueError, TypeError):
+            return 0.00
+
+    # Process summary
+    if "summary" in data and isinstance(data["summary"], dict):
+        final_data["summary"]["value"] = data["summary"].get("value", "")
+        final_data["summary"]["confidence"] = validate_confidence(data["summary"].get("confidence"))
+
+    # Process sections with lists of items
+    for key in ["education", "work_experience", "certifications", "projects"]:
+        if key in data and isinstance(data[key], dict) and "items" in data[key]:
+            # Keep only non-empty items from the LLM's output
+            non_empty_items = [
+                item for item in data[key]["items"] 
+                if not _is_completely_empty(item)
+            ]
+            final_data[key]["items"] = non_empty_items
+            final_data[key]["confidence"] = validate_confidence(data[key].get("confidence"))
+
+    # Process skills
+    if "skills" in data and isinstance(data["skills"], dict):
+        if isinstance(data["skills"].get("items"), list):
+            # Ensure all items are strings and perform final deduplication
+            skills_list = [str(skill).strip() for skill in data["skills"]["items"] if str(skill).strip()]
+            unique_skills = []
+            seen_skills = set()
+            for skill in skills_list:
+                if skill.lower() not in seen_skills:
+                    seen_skills.add(skill.lower())
+                    unique_skills.append(skill)
+            final_data["skills"]["items"] = unique_skills
+        final_data["skills"]["confidence"] = validate_confidence(data["skills"].get("confidence"))
+        
+    return final_data
+
 def main():
     """Main function to orchestrate the entire resume processing pipeline."""
     config = load_config()
@@ -407,17 +457,21 @@ def main():
     print("\n--- Stage 1 Extraction Result ---")
     print(json.dumps(initial_extraction_result, indent=2))
     
-    # NEW STEP: Local cleaning and normalization
+    # Stage 1.5: Local cleaning and normalization
     print("\n--- Starting Local Data Cleaning ---")
-    cleaned_resume_data = clean_resume_data(initial_extraction_result)
+    cleaned_resume_data = local_structural_cleaning(initial_extraction_result)
     print("--- Local Data Cleaning Complete ---")
-    print(json.dumps(cleaned_resume_data, indent=2))
 
     # Stage 2: Post-processing and final cleaning with LLM
-    final_result = stage2_post_processing(config["api"], config["prompts"], cleaned_resume_data)
+    llm_processed_result = stage2_post_processing(config["api"], config["prompts"], cleaned_resume_data)
     
+    # Stage 3: Final validation and structural cleaning with Python
+    truly_final_result = final_validation_and_cleaning(llm_processed_result, DEFAULT_SCHEMA)
+    print("\n--- Final Validation and Cleaning Complete ---")
+    print(json.dumps(truly_final_result, indent=2))
+
     # Save final result to JSON file
-    save_to_json(final_result, config["output_filename"])
+    save_to_json(truly_final_result, config["output_filename"])
 
 
 if __name__ == "__main__":

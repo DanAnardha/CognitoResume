@@ -7,7 +7,7 @@
     "overlap": 400
   },
   "api": {
-    "url": "https://9144ff1fcc67.ngrok-free.app",
+    "url": "https://a6daa9ae8c27.ngrok-free.app/",
     "max_tokens": 4096,
     "temperature": 0,
     "timeout": 300
