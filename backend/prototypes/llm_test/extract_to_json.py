@@ -1,7 +1,8 @@
 import json
 import re
 import requests
-from typing import Dict, Any, List
+from typing import Any, Dict, List, Union, Set, Tuple
+from collections.abc import Mapping, Sequence
 
 # External libraries
 try:
@@ -103,14 +104,119 @@ def parse_llm_response(response_text: str) -> Dict[str, Any]:
             print("Failed to repair JSON. Returning default schema.")
             return json.loads(json.dumps(DEFAULT_SCHEMA))
 
-def is_item_empty(item: Dict[str, Any]) -> bool:
-    """Helper to check if a data item (e.g., a job entry) is effectively empty."""
-    for value in item.values():
-        if isinstance(value, str) and value.strip():
-            return False  # Found a non-empty string
-        if isinstance(value, list) and value:
-            return False  # Found a non-empty list
-    return True  # All values are empty
+# --- Local JSON Normalization Functions (from user's code) ---
+
+def normalize_json_preserve_structure(data: Any, 
+                                     remove_empty: bool = True,
+                                     remove_duplicates: bool = True,
+                                     case_sensitive_duplicates: bool = True,
+                                     preserve_order: bool = True,
+                                     deep_copy: bool = True) -> Any:
+    """Normalize JSON data while preserving structure of partially filled objects."""
+    if deep_copy:
+        data = json.loads(json.dumps(data))
+    
+    if isinstance(data, Mapping):
+        return _normalize_dict_preserve(data, remove_empty, remove_duplicates, 
+                                       case_sensitive_duplicates, preserve_order)
+    elif isinstance(data, Sequence) and not isinstance(data, (str, bytes)):
+        return _normalize_list_preserve(data, remove_empty, remove_duplicates,
+                                      case_sensitive_duplicates, preserve_order)
+    else:
+        return _normalize_primitive(data, remove_empty)
+
+def _normalize_dict_preserve(data: Dict[str, Any],
+                           remove_empty: bool,
+                           remove_duplicates: bool,
+                           case_sensitive_duplicates: bool,
+                           preserve_order: bool) -> Dict[str, Any]:
+    """Normalize a dictionary while preserving structure of partially filled objects."""
+    result = {}
+    for key, value in data.items():
+        normalized_value = normalize_json_preserve_structure(
+            value, remove_empty, remove_duplicates,
+            case_sensitive_duplicates, preserve_order, deep_copy=False
+        )
+        result[key] = normalized_value
+    if remove_empty and _is_completely_empty(result):
+        return {}
+    return result
+
+def _normalize_list_preserve(data: List[Any],
+                           remove_empty: bool,
+                           remove_duplicates: bool,
+                           case_sensitive_duplicates: bool,
+                           preserve_order: bool) -> List[Any]:
+    """Normalize a list while preserving structure of partially filled objects."""
+    result = []
+    seen = set()
+    for item in data:
+        normalized_item = normalize_json_preserve_structure(
+            item, remove_empty, remove_duplicates,
+            case_sensitive_duplicates, preserve_order, deep_copy=False
+        )
+        if remove_empty and _is_completely_empty(normalized_item):
+            continue
+        if remove_duplicates:
+            item_key = _make_hashable(normalized_item, case_sensitive_duplicates)
+            if item_key in seen:
+                continue
+            seen.add(item_key)
+        result.append(normalized_item)
+    return result
+
+def _normalize_primitive(data: Any, remove_empty: bool) -> Any:
+    """Normalize a primitive value (string, number, boolean, null)."""
+    if isinstance(data, str):
+        cleaned = data.strip()
+        return cleaned
+    return data
+
+def _is_completely_empty(value: Any) -> bool:
+    """Check if a value is completely empty (all nested values are empty)."""
+    if value is None:
+        return True
+    if isinstance(value, str) and not value.strip():
+        return True
+    if isinstance(value, (list, dict)) and not value:
+        return True
+    if isinstance(value, dict):
+        return all(_is_completely_empty(v) for v in value.values())
+    if isinstance(value, list):
+        return all(_is_completely_empty(item) for item in value)
+    return False
+
+def _make_hashable(value: Any, case_sensitive: bool = True) -> Union[Tuple, str, int, float, bool, None]:
+    """Convert a value to a hashable representation for duplicate detection."""
+    if isinstance(value, Mapping):
+        return tuple(sorted((k, _make_hashable(v, case_sensitive)) for k, v in value.items()))
+    elif isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+        return tuple(_make_hashable(item, case_sensitive) for item in value)
+    elif isinstance(value, str):
+        return value if case_sensitive else value.lower()
+    return value
+
+def clean_resume_data(resume_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Specialized function for cleaning resume data while preserving structure."""
+    # First pass: normalize with structure preservation
+    normalized = normalize_json_preserve_structure(resume_data)
+    
+    # Second pass: apply resume-specific cleaning rules
+    # Handle skills section with items and confidence
+    if 'skills' in normalized and isinstance(normalized['skills'], dict) and 'items' in normalized['skills']:
+        skills = [skill.strip() for skill in normalized['skills']['items'] if isinstance(skill, str) and skill.strip()]
+        # Remove duplicates while preserving order
+        unique_skills = []
+        seen_skills = set()
+        for skill in skills:
+            if skill.lower() not in seen_skills:
+                seen_skills.add(skill.lower())
+                unique_skills.append(skill)
+        normalized['skills']['items'] = unique_skills
+    
+    return normalized
+
+# --- Main Processing Functions ---
 
 def merge_results(base: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, Any]:
     """Merges data from a new chunk into the main results dictionary."""
@@ -118,25 +224,20 @@ def merge_results(base: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, Any]:
     if new.get("summary", {}).get("confidence", 0) > base.get("summary", {}).get("confidence", 0):
         base["summary"] = new.get("summary", base["summary"])
         
-    # Merge lists from sections with items, filtering out empty ones
+    # Merge lists from sections with items. Redundancy and empty items will be handled later.
     for key in ["education", "work_experience", "certifications", "projects"]:
         if key in new and "items" in new[key] and isinstance(new[key]["items"], list):
-            # Filter out empty items from the new chunk before merging
-            non_empty_items = [item for item in new[key]["items"] if not is_item_empty(item)]
-            if non_empty_items:
-                base[key]["items"].extend(non_empty_items)
+            if new[key]["items"]:
+                base[key]["items"].extend(new[key]["items"])
                 if new[key].get("confidence", 0) > base[key].get("confidence", 0):
                     base[key]["confidence"] = new[key]["confidence"]
 
-    # Skills: dedupe and merge
+    # Skills: merge all items. Deduplication will be handled later.
     if "skills" in new and "items" in new["skills"] and isinstance(new["skills"]["items"], list):
-        combined_skills = list(set(base["skills"]["items"] + new["skills"]["items"]))
-        base["skills"]["items"] = combined_skills
+        base["skills"]["items"].extend(new["skills"]["items"])
         if new["skills"].get("confidence", 0) > base["skills"].get("confidence", 0):
             base["skills"]["confidence"] = new["skills"]["confidence"]
     return base
-
-# --- Main Processing Functions ---
 
 def extract_text_from_pdf(pdf_path: str, spacy_model_name: str) -> str:
     """Extracts and cleans text from a PDF file using spaCy."""
@@ -161,7 +262,7 @@ def stage1_extraction(api_config: Dict, prompts_config: Dict, chunks: List[str])
     extraction_rules = """
     3. Work Experience must follow strict definitions and include ONLY real employment.
        - "role": the official job title.
-       - "company": the name of the employer.
+       - "company": name of the employer.
        - "description": a summary of responsibilities and achievements.
        - "years": the period of employment (e.g., "2020-2023").
     4. Projects must follow strict definitions and include ONLY actual projects.
@@ -306,8 +407,14 @@ def main():
     print("\n--- Stage 1 Extraction Result ---")
     print(json.dumps(initial_extraction_result, indent=2))
     
-    # Stage 2: Post-processing and final cleaning
-    final_result = stage2_post_processing(config["api"], config["prompts"], initial_extraction_result)
+    # NEW STEP: Local cleaning and normalization
+    print("\n--- Starting Local Data Cleaning ---")
+    cleaned_resume_data = clean_resume_data(initial_extraction_result)
+    print("--- Local Data Cleaning Complete ---")
+    print(json.dumps(cleaned_resume_data, indent=2))
+
+    # Stage 2: Post-processing and final cleaning with LLM
+    final_result = stage2_post_processing(config["api"], config["prompts"], cleaned_resume_data)
     
     # Save final result to JSON file
     save_to_json(final_result, config["output_filename"])
