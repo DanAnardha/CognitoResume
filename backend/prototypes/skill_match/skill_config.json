@@ -1,0 +1,19 @@
+{
+  "scoring_weights": {
+    "experience": 0.1,
+    "education": 0.1,
+    "certification": 0.1,
+    "project": 0.1,
+    "required_skill": 0.30,
+    "optional_skill": 0.15
+  },
+  "skill_thresholds": {
+    "strong": 0.7,
+    "weak": 0.5,
+    "nice": 0.6
+  },
+  "similarity_weights": {
+    "semantic": 0.8,
+    "lexical": 0.2
+  }
+}
