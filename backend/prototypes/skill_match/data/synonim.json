@@ -1,0 +1,64 @@
+{
+  "excel": [
+    "ms excel",
+    "microsoft excel",
+    "excel spreadsheets",
+    "excel pivot",
+    "excel formulas",
+    "excel advanced"
+  ],
+
+  "project management": [
+    "program management",
+    "project coordination",
+    "project planning",
+    "pm",
+    "pmp",
+    "scrum master"
+  ],
+
+  "human resources": [
+    "hr",
+    "people operations",
+    "talent management",
+    "recruiting",
+    "hrbp"
+  ],
+
+  "user interface": [
+    "ui",
+    "ui design",
+    "interface design",
+    "visual design",
+    "mobile ui",
+    "web ui",
+    "ui designer"
+  ],
+
+  "user experience": [
+    "ux",
+    "ux design",
+    "ux research",
+    "user research",
+    "interaction design",
+    "information architecture",
+    "usability testing",
+    "ux designer"
+  ],
+
+  "ui ux": [
+    "ui/ux",
+    "ui ux",
+    "ux/ui",
+    "ui-ux designer",
+    "product designer"
+  ],
+
+  "customer relationship management": [
+    "crm",
+    "crm systems",
+    "salesforce",
+    "hubspot crm",
+    "zoho crm"
+  ]
+}

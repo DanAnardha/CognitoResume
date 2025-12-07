@@ -19,6 +19,8 @@ class EnhancedSkillMatcher:
         
         self.data_dir = Path("data")
         self.cache_dir = Path("cache")
+        self.synonyms_file = self.data_dir / "synonyms.json"
+        self.synonym_map = self._load_json_file(self.synonyms_file)
         self.acronyms_file = self.data_dir / "acronyms.json"
         self.cache_file = self.cache_dir / "embeddings.joblib"
 
@@ -100,9 +102,16 @@ class EnhancedSkillMatcher:
         if not text:
             return ""
         text = text.lower().strip()
+        
+        if text in self.synonym_map:
+            return self.synonym_map[text]
+        for canonical, synonyms in self.synonym_map.items():
+            if text in synonyms:
+                return canonical
         for lower, upper in self.common_acronyms.items():
             import re
             text = re.sub(r'\b' + re.escape(lower) + r'\b', upper, text)
+            
         return text
 
     def _lexical_similarity(self, text1: str, text2: str) -> float:
