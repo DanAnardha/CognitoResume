@@ -1,4 +1,7 @@
 {
+  "model_settings": {
+    "model_name": "all-mpnet-base-v2"
+  },
   "scoring_weights": {
     "experience": 0.1,
     "education": 0.1,
@@ -15,5 +18,12 @@
   "similarity_weights": {
     "semantic": 0.8,
     "lexical": 0.2
+  },
+  "common_acronyms": {
+    "deams": "DEAMS",
+    "gafs/bq": "GAFS/BQ",
+    "dts": "DTS",
+    "gpc": "GPC",
+    "fmiia": "FMFIA"
   }
 }
