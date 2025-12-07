@@ -1,7 +1,10 @@
-# enhanced_skill_matcher_improved.py
+# backend/prototypes/skill_match/skill_matcher.py
 
 import json
 import numpy as np
+import os
+import joblib
+from pathlib import Path
 from rapidfuzz import fuzz
 import logging
 from typing import List, Dict, Any
@@ -13,13 +16,21 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 class EnhancedSkillMatcher:
     def __init__(self, config_path: str = "skill_config.json"):
         self.config = self._load_config(config_path)
-        self.common_acronyms = self.config.get("common_acronyms", {})
+        
+        self.data_dir = Path("data")
+        self.cache_dir = Path("cache")
+        self.acronyms_file = self.data_dir / "acronyms.json"
+        self.cache_file = self.cache_dir / "embeddings.joblib"
+
+        os.makedirs(self.data_dir, exist_ok=True)
+        os.makedirs(self.cache_dir, exist_ok=True)
+        
+        self.common_acronyms = self._load_json_file(self.acronyms_file)
 
         logging.info("Loading sentence transformer model... (this may take a moment)")
         self.model = SentenceTransformer(self.config["model_settings"]["model_name"])
         logging.info("Model loaded successfully.")
         
-        # Thresholds and weights from config
         self.strong_threshold = self.config["skill_thresholds"]["strong"]
         self.weak_threshold = self.config["skill_thresholds"]["weak"]
         self.nice_threshold = self.config["skill_thresholds"]["nice"]
@@ -27,23 +38,19 @@ class EnhancedSkillMatcher:
         self.lexical_weight = self.config["similarity_weights"]["lexical"]
         self.scoring_weights = self.config["scoring_weights"]
         
-        # Relative weights calculation
         total_skill_weight = self.scoring_weights["required_skill"] + self.scoring_weights["optional_skill"]
         self.required_skill_relative_weight = self.scoring_weights["required_skill"] / total_skill_weight
         self.optional_skill_relative_weight = self.scoring_weights["optional_skill"] / total_skill_weight
         
-        # Cache for embeddings
         self.embedding_cache = {}
+        self._load_cache()
 
     def _load_config(self, config_path: str) -> dict:
         default_config = {
             "model_settings": {"model_name": "all-mpnet-base-v2"},
             "skill_thresholds": {"strong": 0.85, "weak": 0.65, "nice": 0.6},
             "similarity_weights": {"semantic": 0.7, "lexical": 0.3},
-            "scoring_weights": {"required_skill": 0.8, "optional_skill": 0.2},
-            "common_acronyms": {
-                "deams": "DEAMS", "gafs/bq": "GAFS/BQ", "dts": "DTS", "gpc": "GPC", "fmiia": "FMFIA"
-            }
+            "scoring_weights": {"required_skill": 0.8, "optional_skill": 0.2}
         }
         try:
             with open(config_path, 'r') as f:
@@ -51,6 +58,35 @@ class EnhancedSkillMatcher:
         except (FileNotFoundError, json.JSONDecodeError):
             logging.warning(f"Config file not found or invalid at {config_path}. Using default configuration.")
             return default_config
+
+    def _load_json_file(self, path: Path) -> dict:
+        try:
+            with open(path, 'r') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            logging.warning(f"Data file not found at {path}. Using empty dict.")
+            return {}
+        except json.JSONDecodeError:
+            logging.error(f"Error decoding JSON from {path}. Using empty dict.")
+            return {}
+
+    def _load_cache(self):
+        if self.cache_file.exists():
+            try:
+                self.embedding_cache = joblib.load(self.cache_file)
+                logging.info(f"Loaded {len(self.embedding_cache)} embeddings from cache.")
+            except Exception as e:
+                logging.warning(f"Could not load cache file. Starting fresh. Error: {e}")
+                self.embedding_cache = {}
+        else:
+            logging.info("Cache file not found. Starting with an empty cache.")
+            self.embedding_cache = {}
+
+    def _save_cache(self):
+        try:
+            joblib.dump(self.embedding_cache, self.cache_file)
+        except Exception as e:
+            logging.error(f"Error: Could not save cache file. Error: {e}")
 
     def _get_relative_weights(self) -> dict:
         return {
@@ -75,9 +111,6 @@ class EnhancedSkillMatcher:
         return fuzz.token_set_ratio(norm1, norm2) / 100.0
 
     def _find_best_match(self, job_skill: str, candidate_skills: List[str], embedding_map: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Mencari kecocokan terbaik untuk satu skill pekerjaan dari daftar skill kandidat.
-        """
         best_match = None
         best_score = 0
         best_semantic_sim = 0
@@ -131,6 +164,7 @@ class EnhancedSkillMatcher:
             new_embeddings = self.model.encode(texts_to_encode, convert_to_tensor=True)
             for text, embedding in zip(texts_to_encode, new_embeddings):
                 self.embedding_cache[text] = embedding
+            self._save_cache()
         
         embedding_map = {text: self.embedding_cache[text] for text in all_texts}
         logging.info("Starting skill matching...")
@@ -178,19 +212,5 @@ class EnhancedSkillMatcher:
             **self._get_relative_weights()
         }
 
-if __name__ == "__main__":
-    matcher = EnhancedSkillMatcher()
-    
-    candidate_skills = ["Financial accounting", "Financial reporting", "General ledger", "Enterprise Resource Planning", "Process improvement", "Budget management", "Compliance", "Staff supervision", "Defense Enterprise Accounting and Management System (DEAMS)", "Accounts payable management", "Training development", "Audit support", "Stakeholder communication", "Program Management"]
-    job_required_skills = ["Financial Accounting", "Financial Reporting", "General Ledger Management", "Enterprise Resource Planning Systems", "Team Leadership", "Process Improvement", "Budget Management", "Regulatory Compliance", "Department of Defense Financial Systems"]
-    job_optional_skills = ["DEAMS", "GAFS/BQ", "Accounts Payable Management", "Training Development", "Audit Support", "Stakeholder Communication", "System Implementation", "Change Management"]
-
-    result = matcher.match_skills(candidate_skills, job_required_skills, job_optional_skills)
-    print(json.dumps(result, indent=2))
-
-    try:
-        with open("results/skill_match_result.json", "w") as f:
-            json.dump(result, f, indent=2)
-        logging.info("Final result saved to results/skill_match_result.json")
-    except Exception as e:
-        logging.error(f"Error saving final result: {e}")
+    def __del__(self):
+        self._save_cache()

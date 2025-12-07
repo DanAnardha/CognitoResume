@@ -1,0 +1,22 @@
+{
+  "deams": "DEAMS",
+  "gafs/bq": "GAFS/BQ",
+  "dts": "DTS",
+  "gpc": "GPC",
+  "fmiia": "FMFIA",
+  "sql": "SQL",
+  "aws": "AWS",
+  "gcp": "GCP",
+  "ci/cd": "CI/CD",
+  "kpi": "KPI",
+  "hr": "HR",
+  "pr": "PR",
+  "ui": "UI",
+  "ux": "UX",
+  "saas": "SaaS",
+  "paas": "PaaS",
+  "iaas": "IaaS",
+  "erp": "ERP",
+  "crm": "CRM",
+  "devops": "DevOps"
+}
