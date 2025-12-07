@@ -1,0 +1,9 @@
+{
+  "pdf_path": "../CV/10554236.pdf",
+  "spacy_model": "en_core_web_sm",
+  "output_path": "output/chunks.json",
+  "chunking": {
+    "size": 13000,
+    "overlap": 400
+  }
+}
