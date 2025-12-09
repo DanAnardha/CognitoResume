@@ -1,0 +1,3 @@
+# CognitoResume
+
+CognitoResume is an AI-driven talent acquisition system designed to automate resume parsing, skill extraction, vacancy matching, reasoning-based candidate evaluation, and candidate ranking. This project is a work in progress and is not yet ready or usable for production; the repository contains experimental code and prototypes under active development. Contributions and issues are welcome, but expect breaking changes as the project evolves.
