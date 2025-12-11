@@ -1,0 +1,32 @@
+{
+  "version": "1.0.0",
+  "model_settings": {
+    "model_name": "all-mpnet-base-v2"
+  },
+  "scoring_weights": {
+    "experience": 0.10,
+    "education": 0.10,
+    "certification": 0.10,
+    "project": 0.10,
+    "required_skill": 0.30,
+    "optional_skill": 0.20
+  },
+  "skill_thresholds": {
+    "strong": 0.7,
+    "nice": 0.6,
+    "weak": 0.5
+  },
+  "similarity_weights": {
+    "semantic": 0.8,
+    "lexical": 0.2
+  },
+  "normalization": {
+    "lowercase": true,
+    "remove_punctuation": true,
+    "strip_whitespace": true,
+    "apply_synonyms": true,
+    "apply_acronyms": true
+  },
+  "synonym_file": "ai_pipeline/pipeline/skill_match/data/synonim.json",
+  "acronym_file": "ai_pipeline/pipeline/skill_match/data/acronym.json"
+}

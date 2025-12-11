@@ -1,0 +1,53 @@
+{
+  "version": "1.0.0",
+  "prompt_root": "ai_pipeline/pipeline/parse/prompts",
+  "pipelines": {
+    "openai": {
+      "steps": [
+        {
+          "name": "parse",
+          "system_prompt": "system/system_parser.txt",
+          "prompt": "parser/openai_parser.txt",
+          "temperature": 0.0,
+          "max_tokens": 4096
+        }
+      ]
+    },
+    "local": {
+      "steps": [
+        {
+          "name": "parse",
+          "system_prompt": "system/system_parser.txt",
+          "prompt": "parser/local_parser.txt",
+          "temperature": 0.0,
+          "max_tokens": 4096
+        },
+        {
+          "name": "validate",
+          "system_prompt": "system/system_validator.txt",
+          "prompt": "validator/validator.txt",
+          "temperature": 0.1,
+          "max_tokens": 4096
+        }
+      ]
+    },
+    "cloud": {
+      "steps": [
+        {
+          "name": "parse",
+          "system_prompt": "system/system_parser.txt",
+          "prompt": "parser/local_parser.txt",
+          "temperature": 0.0,
+          "max_tokens": 4096
+        },
+        {
+          "name": "validate",
+          "system_prompt": "system/system_validator.txt",
+          "prompt": "validator/validator.txt",
+          "temperature": 0.1,
+          "max_tokens": 4096
+        }
+      ]
+    }
+  }
+}

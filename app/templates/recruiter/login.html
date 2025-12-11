@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruiter Login - SmartHire</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .float-animation {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .pulse-animation {
+            animation: pulse-blue 2s infinite;
+        }
+
+        .animated-gradient {
+            background: linear-gradient(-45deg, #3b82f6, #1e40af, #2563eb, #1d4ed8);
+            background-size: 400% 400%;
+            animation: gradient 10s ease infinite;
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6 0%, #1e40af 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Custom button hover effect */
+        .btn-primary {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Input focus effect */
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+
+        .input-focus:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Background pattern */
+        .bg-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233b82f6' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error shake animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        /* Success checkmark */
+        .checkmark {
+            animation: scaleIn 0.3s ease-in-out;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen bg-pattern">
+    <!-- Header Navigation -->
+    <header class="bg-white shadow-[0_0_20px_rgba(0,0,0,0.15)] border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-lg">
+                        <i class="fas fa-brain text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">SmartHire</h1>
+                        <p class="text-sm text-gray-500">AI Engineer Portfolio Project</p>
+                    </div>
+                </div>
+                
+                <nav class="hidden lg:flex items-center space-x-6">
+                    <a href="index.html" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">Home</a>
+                    <a href="#features" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">Features</a>
+                    <a href="#demo" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">Demo</a>
+                    <a href="#contact" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">Contact</a>
+                </nav>
+
+                <div class="flex items-center space-x-3">
+                    <a href="index.html" class="text-gray-700 hover:text-blue-600 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex items-center justify-center min-h-[calc(100vh-80px)] py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <!-- Login Card -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <!-- Card Header -->
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-center">
+                    <div class="bg-white bg-opacity-20 rounded-full p-4 w-20 h-20 mx-auto mb-4">
+                        <i class="fas fa-user-tie text-white text-3xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Welcome Back</h2>
+                    <p class="text-blue-100">Sign in to your recruiter account</p>
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-8">
+                    <!-- Login Form -->
+                    <form id="loginForm" class="space-y-6">
+                        <!-- Email Field -->
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                Email Address
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-envelope text-gray-400"></i>
+                                </div>
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    autocomplete="email"
+                                    required
+                                    class="input-focus appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="recruiter@company.com"
+                                >
+                            </div>
+                            <p class="mt-1 text-sm text-red-600 hidden" id="emailError">
+                                Please enter a valid email address
+                            </p>
+                        </div>
+
+                        <!-- Password Field -->
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                                Password
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-lock text-gray-400"></i>
+                                </div>
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type="password"
+                                    autocomplete="current-password"
+                                    required
+                                    class="input-focus appearance-none block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Enter your password"
+                                >
+                                <button
+                                    type="button"
+                                    id="togglePassword"
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                >
+                                    <i id="eyeIcon" class="fas fa-eye text-gray-400 hover:text-gray-600"></i>
+                                </button>
+                            </div>
+                            <p class="mt-1 text-sm text-red-600 hidden" id="passwordError">
+                                Password must be at least 8 characters
+                            </p>
+                        </div>
+
+                        <!-- Remember Me & Forgot Password -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input
+                                    id="remember-me"
+                                    name="remember-me"
+                                    type="checkbox"
+                                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                >
+                                <label for="remember-me" class="ml-2 block text-sm text-gray-700">
+                                    Remember me
+                                </label>
+                            </div>
+                            <div class="text-sm">
+                                <a href="#" class="font-medium text-blue-600 hover:text-blue-500">
+                                    Forgot password?
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div>
+                            <button
+                                type="submit"
+                                id="loginBtn"
+                                class="btn-primary w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                                <span id="btnText">Sign In</span>
+                                <div id="btnSpinner" class="spinner ml-2 hidden"></div>
+                            </button>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div id="errorMessage" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                <span id="errorText">Invalid email or password</span>
+                            </div>
+                        </div>
+
+                        <!-- Success Message -->
+                        <div id="successMessage" class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle mr-2 checkmark"></i>
+                                <span>Login successful! Redirecting...</span>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="relative my-6">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-white text-gray-500">Or continue with</span>
+                        </div>
+                    </div>
+
+                    <!-- Social Login -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors">
+                            <i class="fab fa-google text-red-500"></i>
+                            <span class="ml-2">Google</span>
+                        </button>
+                        <button class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors">
+                            <i class="fab fa-linkedin text-blue-700"></i>
+                            <span class="ml-2">LinkedIn</span>
+                        </button>
+                    </div>
+
+                    <!-- Sign Up Link -->
+                    <div class="text-center pt-6 border-t border-gray-200">
+                        <p class="text-sm text-gray-600">
+                            Don't have an account?
+                            <a href="register.html" class="font-medium text-blue-600 hover:text-blue-500">
+                                Sign up for free
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="text-center text-sm text-gray-500">
+                <div class="flex items-center justify-center space-x-2 mb-2">
+                    <i class="fas fa-shield-alt text-green-500"></i>
+                    <span>Secure login powered by AI</span>
+                </div>
+                <p>Your data is encrypted and protected</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Toggle password visibility
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            if (type === 'text') {
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        });
+
+        // Form validation and submission
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const emailError = document.getElementById('emailError');
+        const passwordError = document.getElementById('passwordError');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+
+        // Email validation
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // Show error message
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+            errorMessage.classList.add('shake');
+            setTimeout(() => {
+                errorMessage.classList.remove('shake');
+            }, 500);
+        }
+
+        // Hide error message
+        function hideError() {
+            errorMessage.classList.add('hidden');
+        }
+
+        // Show success message
+        function showSuccess() {
+            successMessage.classList.remove('hidden');
+        }
+
+        // Handle form submission
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Reset error states
+            hideError();
+            emailError.classList.add('hidden');
+            passwordError.classList.add('hidden');
+            
+            // Get form values
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            
+            // Validate email
+            if (!validateEmail(email)) {
+                emailError.classList.remove('hidden');
+                emailInput.classList.add('shake');
+                setTimeout(() => {
+                    emailInput.classList.remove('shake');
+                }, 500);
+                return;
+            }
+            
+            // Validate password
+            if (password.length < 8) {
+                passwordError.classList.remove('hidden');
+                passwordInput.classList.add('shake');
+                setTimeout(() => {
+                    passwordInput.classList.remove('shake');
+                }, 500);
+                return;
+            }
+            
+            // Show loading state
+            loginBtn.disabled = true;
+            btnText.textContent = 'Signing in...';
+            btnSpinner.classList.remove('hidden');
+            
+            // Simulate API call
+            setTimeout(() => {
+                // Demo credentials check
+                if (email === 'demo@smarthire.com' && password === 'demo12345') {
+                    showSuccess();
+                    setTimeout(() => {
+                        // Redirect to dashboard
+                        window.location.href = 'dashboard.html';
+                    }, 2000);
+                } else {
+                    showError('Invalid email or password. Try demo@smarthire.com / demo12345');
+                    loginBtn.disabled = false;
+                    btnText.textContent = 'Sign In';
+                    btnSpinner.classList.add('hidden');
+                }
+            }, 1500);
+        });
+
+        // Clear error on input
+        emailInput.addEventListener('input', function() {
+            emailError.classList.add('hidden');
+            hideError();
+        });
+
+        passwordInput.addEventListener('input', function() {
+            passwordError.classList.add('hidden');
+            hideError();
+        });
+
+        // Add input animations
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('scale-105');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('scale-105');
+            });
+        });
+    </script>
+</body>
+
+</html>

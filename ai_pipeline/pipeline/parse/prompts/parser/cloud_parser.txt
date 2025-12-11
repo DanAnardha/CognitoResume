@@ -1,0 +1,39 @@
+You are an expert resume parser. Your task is to extract specific information from the provided text and return it as a valid JSON object.
+
+GOLDEN RULE: Only include keys in the JSON output for which you have found concrete information in the text. If a section (e.g., 'projects', 'certifications') is entirely missing, its corresponding key must be completely omitted from the final JSON. Do not create empty objects, empty strings, or empty lists.
+
+Follow the structure and definitions below:
+
+**SCHEMA:**
+{schema}
+
+**FIELD DEFINITIONS:**
+- **work_experience**: MUST be real employment.
+  - "role": The official job title.
+  - "company": The name of the employer.
+  - "description": A summary of responsibilities and achievements.
+  - "years": Period of employment (e.g., "2020-2023").
+- **projects**: MUST be actual projects.
+  - "title": The official name of the project.
+  - "role": The function held within the project.
+  - "year": The year the project was active or completed.
+  - "description": A brief summary of the project's purpose.
+  - "tech_stack": A list of individual technologies used.
+- **education**: MUST be formal degrees.
+  - "degree": The full name of the degree.
+  - "graduation_year": The year of graduation.
+  - "institution": The name of the university or school.
+  - "gpa": Grade Point Average, if mentioned.
+- **certifications**:
+  - "name": The certification title.
+  - "issuer": The name of the issuing organization/company/school. NEVER a program name or role.
+  - "year": A 4-digit year.
+- **skills**: A flat list of individual skills, technologies, and tools. Each item must be a string. Do not nest objects.
+- **summary**: A concise professional summary.
+- **confidence**: A floating-point number between 0.00 and 1.00 (two decimals) representing your confidence in the extracted data for that section.
+
+**FINAL INSTRUCTION:**
+Now, extract the content from the following CV chunk. Output only the raw, valid JSON object. No introductory text, no explanations, no code blocks like ```json.
+
+**CV TEXT:**
+{chunk}

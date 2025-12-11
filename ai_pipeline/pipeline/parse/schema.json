@@ -1,0 +1,8 @@
+{
+  "summary": {"value": "", "confidence": 0.00},
+  "education": {"items": [{"degree": "", "graduation_year": "", "institution": "", "gpa": ""}], "confidence": 0.00},
+  "work_experience": {"items": [{"role": "", "company": "", "description": "", "years": ""}], "confidence": 0.00},
+  "projects": {"items": [{"title": "", "role": "", "year": "", "description": "", "tech_stack": []}], "confidence": 0.00},
+  "certifications": {"items": [{"name": "", "issuer": "", "year": ""}], "confidence": 0.00},
+  "skills": {"items": [], "confidence": 0.00}
+}

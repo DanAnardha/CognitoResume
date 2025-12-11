@@ -1,0 +1,13 @@
+{
+  "paths": {
+    "raw_dir": "raw/",
+    "processed_dir": "processed/",
+    "output_dir": "output/",
+    "cache_dir": "cache/",
+    "logs_dir": "logs/"
+  },
+  "defaults": {
+    "encoding": "utf-8",
+    "log_level": "INFO"
+  }
+}

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Vacancy Details</title>
+
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #333;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #f0f0f0;
+        }
+        h2 {
+            margin-top: 40px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Vacancy Details</h1>
+
+{% if vacancies is iterable and vacancies is not string %}
+
+    <!-- ===================== LIST OF VACANCIES ===================== -->
+    <h2>All Vacancies</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Public ID</th>
+                <th>Position</th>
+                <th>Department</th>
+                <th>Description</th>
+                <th>Location</th>
+                <th>Work Type</th>
+                <th>Salary</th>
+                <th>Status</th>
+                <th>Applicants</th>
+                <th>Deadline</th>
+                <th>Posting</th>
+
+                <!-- NEW: Weight Summary -->
+                <th>Weights</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in vacancies %}
+            <tr>
+                <td>{{ v.id }}</td>
+                <td>{{ v.public_id }}</td>
+                <td>{{ v.job_position }}</td>
+                <td>{{ v.department }}</td>
+                <td>{{ v.job_description }}</td>
+                <td>{{ v.job_location }}</td>
+                <td>{{ v.work_type }}</td>
+                <td>{{ v.salary_min }} - {{ v.salary_max }}</td>
+                <td>{{ v.status }}</td>
+                <td>{{ v.num_applicants }}/{{ v.max_applicants }}</td>
+                <td>{{ v.application_deadline }}</td>
+                <td>{{ v.posting_date }}</td>
+
+                <!-- NEW Weight Display -->
+                <td>
+                    {% if v.weight %}
+                        Edu: {{ v.weight.education_weight }} |
+                        Exp: {{ v.weight.experience_weight }} |
+                        Proj: {{ v.weight.projects_weight }} |
+                        Cert: {{ v.weight.certifications_weight }} |
+                        Req: {{ v.weight.required_skills_weight }} |
+                        Opt: {{ v.weight.optional_skills_weight }}
+                    {% else %}
+                        <i>No weight set</i>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% else %}
+
+    <!-- ===================== SINGLE VACANCY DETAILS ===================== -->
+    <h2>Vacancy: {{ vacancies.job_position }}</h2>
+
+    <table>
+        <tbody>
+            <tr><th>ID</th><td>{{ vacancies.id }}</td></tr>
+            <tr><th>Public ID</th><td>{{ vacancies.public_id }}</td></tr>
+            <tr><th>Department</th><td>{{ vacancies.department }}</td></tr>
+            <tr><th>Description</th><td>{{ vacancies.job_description }}</td></tr>
+            <tr><th>Location</th><td>{{ vacancies.job_location }}</td></tr>
+            <tr><th>Work Type</th><td>{{ vacancies.work_type }}</td></tr>
+            <tr><th>Experience</th><td>{{ vacancies.experience_level }} ({{ vacancies.min_years_experience }} yrs)</td></tr>
+            <tr><th>Salary</th><td>{{ vacancies.salary_min }} - {{ vacancies.salary_max }}</td></tr>
+            <tr><th>Status</th><td>{{ vacancies.status }}</td></tr>
+            <tr><th>Applicants</th><td>{{ vacancies.num_applicants }}/{{ vacancies.max_applicants }}</td></tr>
+            <tr><th>Deadline</th><td>{{ vacancies.application_deadline }}</td></tr>
+            <tr><th>Posting Date</th><td>{{ vacancies.posting_date }}</td></tr>
+        </tbody>
+    </table>
+
+    <!-- ===================== WEIGHTS TABLE ===================== -->
+    <h2>Scoring Weights</h2>
+
+    {% if weights %}
+    <table>
+        <tbody>
+            <tr><th>Education Weight</th><td>{{ weights.education_weight }}</td></tr>
+            <tr><th>Experience Weight</th><td>{{ weights.experience_weight }}</td></tr>
+            <tr><th>Projects Weight</th><td>{{ weights.projects_weight }}</td></tr>
+            <tr><th>Certifications Weight</th><td>{{ weights.certifications_weight }}</td></tr>
+            <tr><th>Required Skills Weight</th><td>{{ weights.required_skills_weight }}</td></tr>
+            <tr><th>Optional Skills Weight</th><td>{{ weights.optional_skills_weight }}</td></tr>
+        </tbody>
+    </table>
+    {% else %}
+        <p><i>No weights assigned to this vacancy.</i></p>
+    {% endif %}
+
+    <!-- ===================== LIST SECTIONS ===================== -->
+    <h2>Responsibilities</h2>
+    <ul>
+        {% for r in vacancies.responsibilities %}
+        <li>{{ r.responsibility }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Certifications</h2>
+    <ul>
+        {% for c in vacancies.certifications %}
+        <li>{{ c.certification }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Required Skills</h2>
+    <ul>
+        {% for s in vacancies.required_skills %}
+        <li>{{ s.skill }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Optional Skills</h2>
+    <ul>
+        {% for s in vacancies.optional_skills %}
+        <li>{{ s.skill }}</li>
+        {% endfor %}
+    </ul>
+
+{% endif %}
+
+</body>
+</html>

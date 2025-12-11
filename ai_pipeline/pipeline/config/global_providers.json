@@ -1,0 +1,43 @@
+{
+  "version": "1.0.0",
+  "active": {
+    "primary": "openai",
+    "fallback": ["cloud"],
+    "use_fallback": true
+  },
+  "providers": {
+    "openai": {
+      "type": "openai",
+      "api_key_env": "OPENAI_API_KEY",
+      "model": "gpt-4o-mini",
+      "max_tokens": 4096,
+      "default_temperature": 0.0,
+      "default_stream": true,
+      "supports_system_prompt": true,
+      "supports_json_mode": true
+    },
+    "cloud": {
+      "type": "cloud",
+      "url_env": "CLOUD_LLM_URL",
+      "max_tokens": 4096,
+      "default_temperature": 0.0,
+      "timeout": 60,
+      "default_stream": true,
+      "supports_system_prompt": true,
+      "supports_json_mode": true
+    },
+    "local": {
+      "type": "local",
+      "model_path_env": "LOCAL_LLM_PATH",
+      "n_ctx": 32768,
+      "n_threads": 11,
+      "n_gpu_layers": -1,
+      "max_tokens": 4096,
+      "default_temperature": 0.0,
+      "verbose": false,
+      "default_stream": true,
+      "supports_system_prompt": true,
+      "supports_json_mode": true
+    }
+  }
+}

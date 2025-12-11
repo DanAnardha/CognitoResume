@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "nlp": {
+    "spacy_model": "en_core_web_sm"
+  },
+  "chunking": {
+    "size": 13000,
+    "overlap": 400
+  }
+}

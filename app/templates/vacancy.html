@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Vacancy Details - Recruiter Dashboard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- jQuery (Required for DataTables) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.tailwindcss.min.css">
+
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+
+    <!-- DataTables Responsive JS -->
+    <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+
+    <!-- DataTables Buttons JS -->
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+
+    <!-- DataTables Select JS -->
+    <script src="https://cdn.datatables.net/select/1.7.0/js/dataTables.select.min.js"></script>
+
+    <style>
+        #applicantsTable {
+            /* table-layout: fixed; */
+            table-layout: auto;
+            white-space: normal;
+            /* min-width: 1000px; */
+            border-collapse: separate;
+            border-spacing: 12px 0;
+        }
+
+        #applicantsTable th {
+            min-width: 120px;
+            white-space: nowrap;
+            vertical-align: middle !important;
+        }
+
+        #applicantsTable td {
+            min-width: 120px;
+            vertical-align: middle !important;
+        }
+
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .badge-primary {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-secondary {
+            background-color: #f3f4f6;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
+
+        .text-2xs {
+            font-size: 0.5rem;
+            line-height: 0.75rem;
+        }
+
+        /* Status Badge Colors */
+        .badge-status-shortlisted {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-status-accepted {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-status-rejected {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-status-processed {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .badge-status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-more-strengths {
+            background-color: #dcfce7;
+            color: #14532d;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.5rem;
+            margin: 0.1rem;
+        }
+
+        .badge-more-weaknesses {
+            background-color: #fee2e2;
+            color: #7f1d1d;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.5rem;
+            margin: 0.1rem;
+        }
+
+        /* Strengths and Weaknesses Badge Colors */
+        .badge-strength {
+            background-color: #dcfce7;
+            color: #14532d;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.5rem;
+            margin: 0.05rem;
+            display: -webkit-box;
+
+            /* → Ellipsis */
+            /* MULTILINE ELLIPSIS */
+            white-space: normal;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            -webkit-line-clamp: 1;
+            /* batas jumlah baris */
+            -webkit-box-orient: vertical;
+
+            max-width: 50ch;
+
+        }
+
+        .strengths-weaknesses-list {
+            display: flex;
+            flex-wrap: wrap;
+            /* ← agar badge panjang tetap rapi */
+            gap: 2px;
+        }
+
+        .badge-weakness {
+            background-color: #fee2e2;
+            color: #7f1d1d;
+            font-size: 0.65rem;
+            padding: 0.15rem 0.5rem;
+            margin: 0.05rem;
+
+            /* Multi-line ellipsis behavior seperti strengths */
+            display: -webkit-box;
+            white-space: normal;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            max-width: 50ch;
+        }
+
+        /* Colored Percentage Styles */
+        .percent-high {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        /* Green */
+        .percent-medium {
+            color: #d97706;
+            font-weight: 600;
+        }
+
+        /* Yellow/Orange */
+        .percent-low {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        /* Red */
+
+        /* Completeness Badge */
+        .badge-completeness {
+            display: inline-block;
+            padding: 0.125rem 0.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        /* Completeness Badge Styles */
+        .badge-completeness-high {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-completeness-medium {
+            background-color: #fed7aa;
+            color: #92400e;
+        }
+
+        .badge-completeness-low {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .responsibility-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .responsibility-item i {
+            color: #3b82f6;
+            margin-top: 0.1rem;
+            font-size: 0.875rem;
+        }
+
+        /* Custom progress bar animation */
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* --- LOADING SCREEN STYLES --- */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.5s ease-out;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+
+        .loading-subtitle {
+            font-size: 1rem;
+            color: #6b7280;
+        }
+
+        /* --- Dropdown Menu Styles --- */
+        .dropdown-submenu {
+            position: absolute;
+            top: 0;
+            /* Position submenu to the right of its parent item */
+            right: 100%;
+            background-color: white;
+            border-radius: 0.375rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 0.5rem 0;
+            min-width: 12rem;
+            display: none;
+            /* Hidden by default */
+            z-index: 20;
+        }
+
+        /* Make submenu always appear on hover */
+        .dropdown-item-has-submenu:hover .dropdown-submenu {
+            display: block;
+        }
+
+        .dropdown-submenu a {
+            display: block;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            color: #374151;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .dropdown-submenu a:hover {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+
+        /* --- Print Styles --- */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            .print-area,
+            .print-area * {
+                visibility: visible;
+            }
+
+            .print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+
+
+
+        #applicantsTable th[data-column="7"],
+        #applicantsTable td:nth-child(8) {
+            width: 280px;
+            /* ~50ch */
+        }
+
+        #tableWrapper {
+            overflow-x: auto !important;
+        }
+
+        /* DataTables Custom Styles */
+        #applicantsTable_wrapper {
+            overflow-x: auto !important;
+            margin-top: 1rem;
+        }
+
+        #applicantsTable_wrapper .dataTables_filter {
+            margin-bottom: 1rem;
+        }
+
+        #applicantsTable_wrapper .dataTables_filter input {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            margin-left: 0.5rem;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        #applicantsTable_wrapper .dataTables_filter input:focus {
+            border-color: #3b82f6;
+            outline: 0;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        #applicantsTable_wrapper .dataTables_filter label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        #applicantsTable_wrapper .dataTables_length {
+            margin-bottom: 1rem;
+        }
+
+        #applicantsTable_wrapper .dataTables_length select {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            margin-left: 0.5rem;
+            background-color: white;
+        }
+
+        #applicantsTable_wrapper .dataTables_length label {
+            font-weight: 600;
+            color: #374151;
+        }
+
+        #applicantsTable_wrapper .dataTables_info {
+            margin-top: 1rem;
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        #applicantsTable_wrapper .dataTables_paginate {
+            margin-top: 1rem;
+        }
+
+        .dataTables_paginate .paginate_button.current {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%) !important;
+            color: white !important;
+            border-radius: 0.375rem;
+        }
+
+        .dataTables_paginate .paginate_button:hover {
+            background: #e5e7eb !important;
+            border-radius: 0.375rem;
+        }
+
+        /* Custom column visibility dropdown */
+        .column-visibility-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .column-visibility-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0;
+            right: 0;
+        }
+
+        .column-visibility-dropdown:hover .column-visibility-content {
+            display: block;
+        }
+
+        .column-visibility-content label {
+            display: block;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+
+        .column-visibility-content label:hover {
+            background-color: #f3f4f6;
+        }
+
+        th.sorted-asc::after {
+            content: " ▲";
+            font-size: 0.7rem;
+        }
+
+        th.sorted-desc::after {
+            content: " ▼";
+            font-size: 0.7rem;
+        }
+
+
+        /* Status filter dropdown */
+        .status-filter-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .status-filter-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0;
+            right: 0;
+        }
+
+        .status-filter-dropdown:hover .status-filter-content {
+            display: block;
+        }
+
+        .status-filter-content label {
+            display: block;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+
+        .status-filter-content label:hover {
+            background-color: #f3f4f6;
+        }
+
+        #applicantsTable tbody td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.875rem;
+            vertical-align: top;
+        }
+
+        #applicantsTable tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        /* Horizontal scrolling */
+        .table-container {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        /* Action Button Styles */
+        .btn-action {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            border-radius: 0.25rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
+
+        .btn-view {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-color: #bfdbfe;
+        }
+
+        .btn-view:hover {
+            background-color: #bfdbfe;
+        }
+
+        .btn-edit {
+            background-color: #f3f4f6;
+            color: #374151;
+            border-color: #e5e7eb;
+        }
+
+        .btn-edit:hover {
+            background-color: #e5e7eb;
+        }
+
+        /* Strengths and Weaknesses container styles */
+        .strengths-weaknesses-container {
+            min-width: 250px;
+            /* boleh 200–350px sesuai kebutuhan */
+            max-width: 300px;
+            width: 100%;
+        }
+
+        .action-buttons-wrapper {
+            display: inline-flex;
+            flex-wrap: nowrap;
+            gap: 6px;
+            /* jarak antar tombol */
+            white-space: nowrap;
+        }
+
+        /* Kolom Nama (col 2), Experience (col 3), dan Last Updated (col 11) */
+        #applicantsTable th:nth-child(2),
+        #applicantsTable td:nth-child(2),
+        #applicantsTable th:nth-child(3),
+        #applicantsTable td:nth-child(3),
+        #applicantsTable th:nth-child(11),
+        #applicantsTable td:nth-child(11) {
+            white-space: nowrap !important;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+    <!-- LOADING SCREEN -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h1 class="loading-title">Loading Vacancy Details</h1>
+            <p class="loading-subtitle">Please wait while we fetch vacancy data...</p>
+        </div>
+    </div>
+
+    <!-- Header (Restored to Original Style) -->
+    <header class="bg-white shadow-[0_0_20px_rgba(0,0,0,0.15)] border-b border-gray-200 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-lg">
+                        <i class="fas fa-briefcase text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Recruiter Dashboard</h1>
+                        <p class="text-sm text-gray-500">Private vacancy management system</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="theme-toggle"
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg transition-all duration-300">
+                        <i class="fas fa-moon" id="theme-icon"></i>
+                    </button>
+                    <button
+                        class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-all duration-300 flex items-center space-x-2">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Privacy Settings</span>
+                    </button>
+                    <button
+                        class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:shadow-lg transition-all duration-300 flex items-center space-x-2">
+                        <i class="fas fa-download"></i>
+                        <span>Export Report</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Back Button & Status -->
+        <div class="flex items-center justify-between mb-4 no-print">
+            <button onclick="goBack()" class="inline-flex items-center text-sm text-gray-500 hover:text-gray-700">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Back to Vacancies
+            </button>
+            <span class="text-sm text-gray-500">Vacancy ID: #VAC-00123</span>
+        </div>
+
+        <!-- Single Unified Vacancy Block -->
+        <div id="vacancyDetailsContainer" class="bg-white rounded-lg shadow-[0_0_20px_rgba(0,0,0,0.15)] p-6 md:p-8 mb-6">
+
+            <!-- 1. Compact Job Header -->
+            <div
+                class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 pb-4 border-b border-gray-100">
+                <div class="flex-1">
+                    <h2 class="text-2xl font-bold text-gray-900 leading-tight">Safety Officer</h2>
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-gray-500">
+                        <span class="flex items-center">
+                            <i class="fas fa-building mr-1"></i> PT. Engineering Corp
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-1"></i> Medan, ID
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-briefcase mr-1"></i> Mid-level
+                        </span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 sm:justify-end no-print">
+                    <span class="badge badge-primary">
+                        <i class="fas fa-circle text-green-500 text-xs mr-2" style="font-size: 6px;"></i> Active
+                    </span>
+                    <span class="text-sm text-gray-500">24 Applicants</span>
+
+                    <!-- Actions Dropdown -->
+                    <div class="relative">
+                        <button onclick="toggleDropdown()"
+                            class="flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-md px-3 py-1.5 hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                        <div id="actionsDropdown"
+                            class="hidden absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                            <div class="py-1" role="menu">
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    role="menuitem">
+                                    <i class="fas fa-edit mr-2 text-gray-400"></i> Edit Vacancy
+                                </a>
+                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    role="menuitem">
+                                    <i class="fas fa-toggle-off mr-2 text-gray-400"></i> Deactivate
+                                </a>
+                                <div class="relative dropdown-item-has-submenu" role="menuitem">
+                                    <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        id="pdf-submenu-trigger">
+                                        <i class="fas fa-file-pdf mr-2 text-gray-400"></i> Print as PDF
+                                        <i class="fas fa-chevron-right ml-auto text-gray-400"></i>
+                                    </a>
+                                    <div id="pdf-submenu" class="dropdown-submenu">
+                                        <a href="#" onclick="printFullPage()"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i class="fas fa-print mr-2 text-gray-400"></i> Full Page
+                                        </a>
+                                        <a href="#" onclick="printVacancyDetails()"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i class="fas fa-file-contract mr-2 text-gray-400"></i> Vacancy Details Only
+                                        </a>
+                                        <a href="#" onclick="printStatistics()"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            <i class="fas fa-chart-bar mr-2 text-gray-400"></i> Statistics Only
+                                        </a>
+                                    </div>
+                                </div>
+                                <hr class="my-1">
+                                <a href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                                    role="menuitem">
+                                    <i class="fas fa-trash mr-2"></i> Delete Vacancy
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Main Body Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+
+                <!-- Left Column: Narrative Content -->
+                <div class="lg:col-span-2 space-y-5">
+
+                    <!-- Job Description -->
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-900 mb-2">Job Description</h3>
+                        <p class="text-gray-700 text-sm leading-relaxed">
+                            We are seeking a dedicated and experienced Safety Officer to join our team in Medan. The
+                            ideal candidate will be responsible for ensuring a safe and healthy work environment,
+                            particularly in our operations involving heavy port equipment. You will play a crucial role
+                            in developing, implementing, and monitoring our safety policies and procedures in compliance
+                            with national regulations and ISO 45001 standards.
+                        </p>
+                    </div>
+
+                    <!-- Key Responsibilities -->
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-900 mb-3">Key Responsibilities</h3>
+                        <ul class="space-y-2">
+                            <li class="responsibility-item">
+                                <i class="fas fa-check-circle"></i>
+                                <p class="text-gray-700 text-sm">Conduct regular risk assessments and site inspections
+                                    to identify potential hazards.</p>
+                            </li>
+                            <li class="responsibility-item">
+                                <i class="fas fa-check-circle"></i>
+                                <p class="text-gray-700 text-sm">Develop and implement emergency response plans and
+                                    conduct drills.</p>
+                            </li>
+                            <li class="responsibility-item">
+                                <i class="fas fa-check-circle"></i>
+                                <p class="text-gray-700 text-sm">Provide safety training and induction to all employees
+                                    and contractors.</p>
+                            </li>
+                            <li class="responsibility-item">
+                                <i class="fas fa-check-circle"></i>
+                                <p class="text-gray-700 text-sm">Ensure compliance with all relevant Indonesian safety
+                                    regulations and ISO 45001.</p>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Skills Section -->
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-900 mb-3">Skills & Qualifications</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <h4 class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">Required
+                                    Skills</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="badge badge-primary">Risk Assessment</span>
+                                    <span class="badge badge-primary">ISO 45001</span>
+                                    <span class="badge badge-primary">Emergency Planning</span>
+                                    <span class="badge badge-primary">Safety Regulations</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2">
+                                    Nice-to-Have Skills</h4>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="badge badge-secondary">JavaScript</span>
+                                    <span class="badge badge-secondary">Node.js</span>
+                                    <span class="badge badge-secondary">Data Analysis</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Ultra-Compact Structured Data -->
+                <div class="lg:col-span-1 space-y-5">
+                    <!-- Compact Job Details -->
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-900 mb-3">Job Details</h3>
+                        <dl class="space-y-2.5 text-sm">
+                            <div class="flex justify-between items-center">
+                                <dt class="flex items-center gap-2 text-gray-500"><i class="fas fa-layer-group w-4"></i>
+                                    Level</dt>
+                                <dd class="font-medium text-gray-900">Mid-level</dd>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <dt class="flex items-center gap-2 text-gray-500"><i class="fas fa-clock w-4"></i>
+                                    Experience</dt>
+                                <dd class="font-medium text-gray-900">2-3 Years</dd>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <dt class="flex items-center gap-2 text-gray-500"><i
+                                        class="fas fa-laptop-house w-4"></i> Work Type</dt>
+                                <dd class="font-medium text-gray-900">On-site</dd>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <dt class="flex items-center gap-2 text-gray-500"><i
+                                        class="fas fa-map-marker-alt w-4"></i> Location</dt>
+                                <dd class="font-medium text-gray-900">Medan, ID</dd>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <dt class="flex items-center gap-2 text-gray-500"><i
+                                        class="fas fa-calendar-times w-4"></i> Deadline</dt>
+                                <dd class="font-medium text-gray-900">Nov 30, 2025</dd>
+                            </div>
+                        </dl>
+                    </div>
+
+                    <!-- Education & Certifications (Moved Up) -->
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-900 mb-2">Education & Certifications</h3>
+                        <div class="space-y-1.5 text-sm">
+                            <p><span class="font-semibold text-gray-700">Education:</span> Diploma/Bachelor's in OHS,
+                                Engineering, or Management.</p>
+                            <p><span class="font-semibold text-gray-700">Certifications:</span> Certified Safety
+                                Professional (CSP) is a plus.</p>
+                        </div>
+                    </div>
+
+                    <!-- Salary Range -->
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-900 mb-2">Salary</h3>
+                        <p class="text-xl font-bold text-gray-900">$45,000 — $65,000 <span
+                                class="text-sm font-normal text-gray-500">/ year</span></p>
+                    </div>
+
+                    <!-- Max Applicants Progress Bar -->
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-900 mb-2">Applicants</h3>
+                        <div class="flex items-center justify-between text-xs text-gray-500 mb-1.5">
+                            <span>Progress</span>
+                            <span class="font-medium">24 / 50</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div class="progress-bar-fill h-2 rounded-full" style="width: 48%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- --- RESTRUCTURED SECTION: VACANCY ANALYTICS (UPGRADED WITH CHART.JS) --- -->
+        <div id="statisticsContainer" class="bg-white rounded-lg shadow-[0_0_20px_rgba(0,0,0,0.15)] p-6 md:p-8 mb-6">
+            <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-chart-line mr-3 text-blue-600"></i>
+                Vacancy Analytics & Performance
+            </h2>
+
+            <!-- Key Metrics Cards (Updated) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Total Applicants</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1 flex items-center gap-2">
+                        <span>24</span>
+                        <i class="fas fa-users text-gray-400 text-lg"></i>
+                    </p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Avg Match</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1 flex items-center gap-2">
+                        <span>78%</span>
+                        <i class="fas fa-bullseye text-gray-400 text-lg"></i>
+                    </p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Avg Position Fit</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1 flex items-center gap-2">
+                        <span>85%</span>
+                        <i class="fas fa-user-check text-gray-400 text-lg"></i>
+                    </p>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <p class="text-xs font-medium text-gray-600 uppercase tracking-wide">Avg Skills Fit</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1 flex items-center gap-2">
+                        <span>92%</span>
+                        <i class="fas fa-cogs text-gray-400 text-lg"></i>
+                    </p>
+                </div>
+            </div>
+
+            <!-- --- NEW LAYOUT WITH CHART.JS --- -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Row 1: Applicants Over Time (Full Width) -->
+                <div class="lg:col-span-2">
+                    <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center justify-between">
+                        <span>
+                            <i class="fas fa-calendar-alt mr-2 text-gray-400"></i> Applicants Over Time
+                        </span>
+                    </h3>
+                    <div class="relative h-64">
+                        <canvas id="applicantsOverTimeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Row 2: Status Distribution & Experience Level (Two Columns) -->
+                <div>
+                    <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center justify-between">
+                        <span>
+                            <i class="fas fa-tasks mr-2 text-gray-400"></i> Application Status Distribution
+                        </span>
+                    </h3>
+                    <div class="relative h-64">
+                        <canvas id="statusDistributionChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Applicant Experience Level -->
+                <div>
+                    <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center justify-between">
+                        <span>
+                            <i class="fas fa-layer-group mr-2 text-gray-400"></i> Applicant Experience Level
+                        </span>
+                    </h3>
+                    <div class="flex items-center space-x-6">
+                        <div class="relative h-64 w-64">
+                            <canvas id="experienceLevelChart"></canvas>
+                        </div>
+                        <div class="flex-1 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-blue-900 rounded-full"></div>
+                                    <span class="text-sm text-gray-700">Mid-level</span>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900">35% (8)</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-blue-600 rounded-full"></div>
+                                    <span class="text-sm text-gray-700">Senior</span>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900">30% (7)</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-blue-400 rounded-full"></div>
+                                    <span class="text-sm text-gray-700">Junior</span>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900">15% (4)</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-blue-200 rounded-full"></div>
+                                    <span class="text-sm text-gray-700">Lead</span>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900">8% (2)</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-blue-100 rounded-full"></div>
+                                    <span class="text-sm text-gray-700">Entry</span>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900">10% (2)</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-3 h-3 bg-gray-100 rounded-full border border-gray-300"></div>
+                                    <span class="text-sm text-gray-700">Principal</span>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900">2% (1)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 3: Top Applicants (Full Width, Modified Table) -->
+            <div>
+                <h3 class="text-base font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-trophy mr-2 text-gray-400"></i> Top Applicants
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Rank</th>
+                                <th
+                                    class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Applicant</th>
+                                <th
+                                    class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Match</th>
+                                <th
+                                    class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Position Fit</th>
+                                <th
+                                    class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Skills Fit</th>
+                                <th
+                                    class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 whitespace-nowrap text-center text-sm font-bold text-gray-900">
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-600">1</span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">Andi Pratama S.Kom.</p>
+                                        <p class="text-xs text-gray-500">Senior</p>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">95%</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">98%</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">92%</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center"><span
+                                        class="badge badge-status-shortlisted">Shortlisted</span></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 whitespace-nowrap text-center text-sm font-bold text-gray-900">
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-600">2</span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">Siti Wijaya M.Eng.</p>
+                                        <p class="text-xs text-gray-500">Mid-level</p>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">92%</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">95%</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">88%</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center"><span
+                                        class="badge badge-status-shortlisted">Shortlisted</span></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 whitespace-nowrap text-center text-sm font-bold text-gray-900">
+                                    <span
+                                        class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-blue-100 text-blue-600">3</span>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900">Citra Lestari S.H.</p>
+                                        <p class="text-xs text-gray-500">Junior</p>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">88%</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">90%</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center text-sm text-gray-700">85%</td>
+                                <td class="px-4 py-3 whitespace-nowrap text-center"><span
+                                        class="badge badge-status-accepted">Accepted</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- --- NEW SECTION: ALL APPLICANTS DETAILS --- -->
+        <div id="applicantDetailsContainer" class="bg-white rounded-lg shadow-[0_0_20px_rgba(0,0,0,0.15)] p-6 md:p-8 no-print">
+            <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                <i class="fas fa-users mr-3 text-blue-600"></i>
+                All Applicants (5)
+            </h2>
+
+            <!-- Table Controls -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                <!-- Search and Show Entries -->
+                <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    <div class="relative">
+                        <input type="text" id="tableSearch" placeholder="Search applicants..."
+                            class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-64">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <label for="tableLength" class="mr-2 text-sm font-medium text-gray-700">Show</label>
+                        <select id="tableLength"
+                            class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="5">5 entries</option>
+                            <option value="10">10 entries</option>
+                            <option value="25">25 entries</option>
+                            <option value="50">50 entries</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Column Visibility and Status Filter -->
+                <div class="flex gap-4">
+                    <!-- Column Visibility Dropdown -->
+                    <div class="column-visibility-dropdown">
+                        <button
+                            class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center">
+                            <i class="fas fa-columns mr-2"></i>
+                            Columns
+                            <i class="fas fa-chevron-down ml-2"></i>
+                            <span id="columnCount" class="ml-2 text-xs text-gray-500">(5 of 12)</span>
+                        </button>
+                        <div class="column-visibility-content">
+                            <label><input type="checkbox" class="mr-2" data-column="0" checked> Rank</label>
+                            <label><input type="checkbox" class="mr-2" data-column="1" checked> Name</label>
+                            <label><input type="checkbox" class="mr-2" data-column="2"> Experience Level</label>
+                            <label><input type="checkbox" class="mr-2" data-column="3"> Status</label>
+                            <label><input type="checkbox" class="mr-2" data-column="4"> Completeness</label>
+                            <label><input type="checkbox" class="mr-2" data-column="5" checked> Position Fit</label>
+                            <label><input type="checkbox" class="mr-2" data-column="6"> Skill Match</label>
+                            <label><input type="checkbox" class="mr-2" data-column="7"> Strengths</label>
+                            <label><input type="checkbox" class="mr-2" data-column="8"> Weaknesses</label>
+                            <label><input type="checkbox" class="mr-2" data-column="9" checked> Flags</label>
+                            <label><input type="checkbox" class="mr-2" data-column="10"> Last Updated</label>
+                            <label><input type="checkbox" class="mr-2" data-column="11" checked> Actions</label>
+                        </div>
+                    </div>
+
+                    <!-- Status Filter Dropdown -->
+                    <div class="status-filter-dropdown">
+                        <button
+                            class="bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center">
+                            <i class="fas fa-filter mr-2"></i>
+                            Status
+                            <i class="fas fa-chevron-down ml-2"></i>
+                        </button>
+                        <div class="status-filter-content">
+                            <label><input type="checkbox" class="mr-2" data-status="all" checked> All Status</label>
+                            <label><input type="checkbox" class="mr-2" data-status="shortlisted"> Shortlisted</label>
+                            <label><input type="checkbox" class="mr-2" data-status="accepted"> Accepted</label>
+                            <label><input type="checkbox" class="mr-2" data-status="rejected"> Rejected</label>
+                            <label><input type="checkbox" class="mr-2" data-status="processed"> Processed</label>
+                            <label><input type="checkbox" class="mr-2" data-status="pending"> Pending</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Container with Horizontal Scrolling -->
+            <div id="tableWrapper" class="table-container">
+                <table id="applicantsTable" class="display w-full" style="font-size: 0.875rem;">
+                    <thead>
+                        <tr>
+                            <th data-column="0">Rank</th>
+                            <th data-column="1">Name</th>
+                            <th data-column="2">Experience Level</th>
+                            <th data-column="3">Status</th>
+                            <th data-column="4">Completeness</th>
+                            <th data-column="5">Position Fit</th>
+                            <th data-column="6">Skill Match</th>
+                            <th data-column="7">Strengths</th>
+                            <th data-column="8">Weaknesses</th>
+                            <th data-column="9">Flags</th>
+                            <th data-column="10">Last Updated</th>
+                            <th data-column="11">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Sample data with more applicants -->
+                        <tr>
+                            <td class="text-center">1</td>
+                            <td><strong>Andi Pratama Aditya Anardha</strong><br><span
+                                    class="text-gray-500">andi.p@email.com</span>
+                            </td>
+                            <td>Senior (10 yrs)</td>
+                            <td class="text-center"><span class="badge badge-status-shortlisted">Shortlisted</span></td>
+                            <td class="text-center"><span
+                                    class="badge badge-completeness badge-completeness-high">95%</span></td>
+                            <td class="text-center">98%</td>
+                            <td class="text-center">92%</td>
+                            <td>
+                                <div class="strengths-weaknesses-container">
+                                    <div class="strengths-weaknesses-list">
+                                        <span class="badge badge-strength">Strong leadership skills and ability to
+                                            manage high-performing teams effectively</span>
+                                        <span class="badge badge-strength">Highly experienced in strategic long-term
+                                            planning and execution</span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="strengths-weaknesses-container">
+                                    <div class="strengths-weaknesses-list">
+                                        <span class="badge badge-weakness">Needs further development in advanced
+                                            technical operations related to field equipment</span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td class="text-center"><i class="fas fa-exclamation-triangle text-orange-500"
+                                    title="Overqualified for position"></i></td>
+                            <td>2 hours ago</td>
+                            <td class="text-center">
+                                <div class="action-buttons-wrapper">
+                                    <button class="btn-action btn-view mr-1" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-action btn-edit" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">2</td>
+                            <td><strong>Siti Wijaya</strong><br><span class="text-gray-500">siti.w@email.com</span>
+                            </td>
+                            <td>Mid-level (5 yrs)</td>
+                            <td class="text-center"><span class="badge badge-status-accepted">Accepted</span></td>
+                            <td class="text-center"><span
+                                    class="badge badge-completeness badge-completeness-high">88%</span></td>
+                            <td class="text-center">92%</td>
+                            <td class="text-center">85%</td>
+                            <td>
+                                <div class="strengths-weaknesses-container">
+                                    <div class="strengths-weaknesses-list">
+                                        <span class="badge badge-strength">Strong leadership skills and ability to
+                                            manage high-performing teams effectively</span>
+                                        <span class="badge badge-strength">Highly experienced in strategic long-term
+                                            planning and execution</span>
+                                        <span class="badge badge-strength">Documentation</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="strengths-weaknesses-container">
+                                    <div class="strengths-weaknesses-list">
+                                        <span class="badge badge-weakness">Leadership</span>
+                                        <span class="badge badge-weakness">Strategic Planning</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center"><i class="fas fa-check-circle text-green-500"
+                                    title="Well-qualified for position"></i></td>
+                            <td>5 hours ago</td>
+                            <td class="text-center">
+                                <button class="btn-action btn-view mr-1" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn-action btn-edit" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">3</td>
+                            <td><strong>Citra Lestari</strong><br><span class="text-gray-500">citra.l@email.com</span>
+                            </td>
+                            <td>Junior (2 yrs)</td>
+                            <td class="text-center"><span class="badge badge-status-pending">Pending</span></td>
+                            <td class="text-center"><span
+                                    class="badge badge-completeness badge-completeness-medium">75%</span></td>
+                            <td class="text-center">80%</td>
+                            <td class="text-center">70%</td>
+                            <td>
+                                <div class="strengths-weaknesses-container">
+                                    <div class="strengths-weaknesses-list">
+                                        <span class="badge badge-strength">Communication</span>
+                                        <span class="badge badge-strength">Strong leadership skills and ability to
+                                            manage high-performing teams effectively</span>
+                                        <span class="badge badge-strength">Highly experienced in strategic long-term
+                                            planning and execution</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="strengths-weaknesses-container">
+                                    <div class="strengths-weaknesses-list">
+                                        <span class="badge badge-weakness">Experience</span>
+                                        <span class="badge badge-weakness">Technical Skills</span>
+                                        <span class="badge badge-weakness">Certifications</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center"><i class="fas fa-info-circle text-blue-500"
+                                    title="Requires further evaluation"></i></td>
+                            <td>1 day ago</td>
+                            <td class="text-center">
+                                <button class="btn-action btn-view mr-1" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn-action btn-edit" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">4</td>
+                            <td><strong>Budi Santoso</strong><br><span class="text-gray-500">budi.s@email.com</span>
+                            </td>
+                            <td>Senior (8 yrs)</td>
+                            <td class="text-center"><span class="badge badge-status-rejected">Rejected</span></td>
+                            <td class="text-center"><span
+                                    class="badge badge-completeness badge-completeness-low">60%</span></td>
+                            <td class="text-center">65%</td>
+                            <td class="text-center">55%</td>
+                            <td>
+                                <div class="strengths-weaknesses-container">
+                                    <div class="strengths-weaknesses-list">
+                                        <span class="badge badge-strength">Experience</span>
+                                        <span class="badge badge-strength">Industry Knowledge</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="strengths-weaknesses-container">
+                                    <div class="strengths-weaknesses-list">
+                                        <span class="badge badge-weakness">Communication</span>
+                                        <span class="badge badge-weakness">Technical Skills</span>
+                                        <span class="badge badge-weakness">Certifications</span>
+                                        <span class="badge badge-weakness">Adaptability</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center"><i class="fas fa-times-circle text-red-500"
+                                    title="Not suitable for position"></i></td>
+                            <td>2 days ago</td>
+                            <td class="text-center">
+                                <button class="btn-action btn-view mr-1" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn-action btn-edit" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-center">5</td>
+                            <td><strong>Dewi Anggraini</strong><br><span class="text-gray-500">dewi.a@email.com</span>
+                            </td>
+                            <td>Lead (12 yrs)</td>
+                            <td class="text-center"><span class="badge badge-status-shortlisted">Shortlisted</span></td>
+                            <td class="text-center"><span
+                                    class="badge badge-completeness badge-completeness-high">92%</span></td>
+                            <td class="text-center">95%</td>
+                            <td class="text-center">90%</td>
+                            <td>
+                                <div class="strengths-weaknesses-container">
+                                    <div class="strengths-weaknesses-list">
+                                        <span class="badge badge-strength">Leadership</span>
+                                        <span class="badge badge-strength">Strategic Planning</span>
+                                        <span class="badge badge-strength">Team Management</span>
+                                        <span class="badge badge-strength">ISO 45001</span>
+                                        <span class="badge badge-strength">Risk Assessment</span>
+                                        <span class="badge badge-strength">Budget Management</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="strengths-weaknesses-container">
+                                    <div class="strengths-weaknesses-list">
+                                        <span class="badge badge-weakness">Technical Skills</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center"><i class="fas fa-star text-yellow-500"
+                                    title="Excellent candidate"></i></td>
+                            <td>3 hours ago</td>
+                            <td class="text-center">
+                                <div class="action-buttons-wrapper">
+                                    <button class="btn-action btn-view mr-1" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-action btn-edit" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4">
+                <div class="text-sm text-gray-700">
+                    Showing <span id="showingStart">1</span> to <span id="showingEnd">5</span> of <span
+                        id="totalEntries">5</span> entries
+                </div>
+                <div class="flex space-x-1">
+                    <button id="prevPage"
+                        class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button
+                        class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">1</button>
+                    <button id="nextPage"
+                        class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- Chart.js Instances ---
+        let applicantsOverTimeChart, statusDistributionChart, experienceLevelChart;
+
+        // --- Data for Charts ---
+        const chartData = {
+            applicantsOverTime: {
+                labels: ['Nov 18', 'Nov 20', 'Nov 22', 'Nov 24', 'Nov 26', 'Nov 28', 'Nov 30'],
+                data: [2, 4, 3, 8, 5, 2, 0]
+            },
+            statusDistribution: {
+                labels: ['Pending', 'Processed', 'Shortlisted', 'Rejected', 'Accepted'],
+                data: [8, 5, 4, 6, 1]
+            },
+            experienceLevel: {
+                labels: ['Mid-level', 'Senior', 'Junior', 'Lead', 'Entry', 'Principal'],
+                data: [8, 7, 4, 2, 2, 1]
+            }
+        };
+
+        // --- Chart.js Configurations ---
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#ddd',
+                    borderWidth: 1,
+                    padding: 10,
+                    displayColors: true,
+                }
+            }
+        };
+
+        // --- Initialize Charts and DataTable on Page Load ---
+        window.addEventListener('load', function () {
+            // Hide loading screen after 3 seconds
+            setTimeout(function () {
+                const loadingScreen = document.getElementById('loadingScreen');
+                loadingScreen.style.opacity = '0';
+                setTimeout(function () {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }, 1000);
+
+            // Initialize Applicants Over Time Chart
+            const ctxTime = document.getElementById('applicantsOverTimeChart').getContext('2d');
+            applicantsOverTimeChart = new Chart(ctxTime, {
+                type: 'line',
+                data: {
+                    labels: chartData.applicantsOverTime.labels,
+                    datasets: [{
+                        label: 'Number of Applicants',
+                        data: chartData.applicantsOverTime.data,
+                        fill: true,
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        tension: 0.3,
+                        pointBackgroundColor: '#3b82f6',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#3b82f6',
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#e5e7eb',
+                                borderDash: [2, 2],
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Initialize Status Distribution Chart
+            const ctxStatus = document.getElementById('statusDistributionChart').getContext('2d');
+            statusDistributionChart = new Chart(ctxStatus, {
+                type: 'bar',
+                data: {
+                    labels: chartData.statusDistribution.labels,
+                    datasets: [{
+                        label: 'Number of Applicants',
+                        data: chartData.statusDistribution.data,
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)', // Pending - Blue
+                            'rgba(59, 130, 246, 0.8)', // Processed - Darker Blue
+                            'rgba(79, 70, 229, 0.9)', // Shortlisted - Indigo
+                            'rgba(107, 114, 128, 0.7)', // Rejected - Gray
+                            'rgba(34, 197, 94, 0.9)'  // Accepted - Green
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(79, 70, 229, 1)',
+                            'rgba(107, 114, 128, 1)',
+                            'rgba(34, 197, 94, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    indexAxis: 'y',
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                display: false
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: true,
+                                color: '#e5e7eb',
+                                borderDash: [2, 2],
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Initialize Experience Level Chart
+            const ctxExperience = document.getElementById('experienceLevelChart').getContext('2d');
+            experienceLevelChart = new Chart(ctxExperience, {
+                type: 'doughnut',
+                data: {
+                    labels: chartData.experienceLevel.labels,
+                    datasets: [{
+                        data: chartData.experienceLevel.data,
+                        backgroundColor: [
+                            '#1e3a8a', // Mid-level
+                            '#2563eb', // Senior
+                            '#60a5fa', // Junior
+                            '#93c5fd', // Lead
+                            '#dbeafe', // Entry
+                            '#f3f4f6'  // Principal
+                        ],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    const value = context.parsed;
+                                    label += value + ' applicants';
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Initialize custom table functionality
+            initializeCustomTable();
+        });
+
+        function initializeCustomTable() {
+            const table = document.getElementById('applicantsTable');
+            const searchInput = document.getElementById('tableSearch');
+            const lengthSelect = document.getElementById('tableLength');
+            const columnCheckboxes = document.querySelectorAll('.column-visibility-content input[type="checkbox"]');
+            const statusCheckboxes = document.querySelectorAll('.status-filter-content input[type="checkbox"]');
+            const prevButton = document.getElementById('prevPage');
+            const nextButton = document.getElementById('nextPage');
+            const showingStart = document.getElementById('showingStart');
+            const showingEnd = document.getElementById('showingEnd');
+            const totalEntries = document.getElementById('totalEntries');
+            const columnCountText = document.getElementById('columnCount');
+
+            let currentPage = 1;
+            let rowsPerPage = parseInt(lengthSelect.value);
+            let allRows = Array.from(table.querySelectorAll('tbody tr'));
+            let filteredRows = [...allRows];
+
+            // Function to get percentage color class
+            function getPercentageClass(value) {
+                const num = parseInt(value);
+                if (num >= 80) return 'percent-high';
+                if (num >= 50) return 'percent-medium';
+                return 'percent-low';
+            }
+
+            // Function to apply percentage colors
+            function applyPercentageColors() {
+                const cols = [5, 6]; // Position Fit, Skill Match
+                cols.forEach(colIndex => {
+                    const cells = table.querySelectorAll(`tbody tr td:nth-child(${colIndex + 1})`);
+                    cells.forEach(cell => {
+                        const text = cell.textContent.trim();
+                        if (text.endsWith('%')) {
+                            const value = text.substring(0, text.length - 1);
+                            cell.className = `text-center ${getPercentageClass(value)}`;
+                        }
+                    });
+                });
+            }
+
+            // Function to update column visibility text
+            function updateColumnVisibilityText() {
+                const totalCols = table.querySelectorAll('thead th').length;
+                const visibleCols = Array.from(table.querySelectorAll('thead th')).filter(th => th.style.display !== 'none').length;
+                columnCountText.textContent = `(${visibleCols} of ${totalCols})`;
+            }
+
+            // Update pagination info
+            function updatePaginationInfo() {
+                const startIndex = (currentPage - 1) * rowsPerPage + 1;
+                const endIndex = Math.min(currentPage * rowsPerPage, filteredRows.length);
+
+                showingStart.textContent = filteredRows.length > 0 ? startIndex : 0;
+                showingEnd.textContent = endIndex;
+                totalEntries.textContent = filteredRows.length;
+
+                prevButton.disabled = currentPage === 1;
+                nextButton.disabled = currentPage === Math.ceil(filteredRows.length / rowsPerPage) || filteredRows.length === 0;
+            }
+
+            // Render table rows
+            function renderTable() {
+                const startIndex = (currentPage - 1) * rowsPerPage;
+                const endIndex = startIndex + rowsPerPage;
+
+                allRows.forEach(row => row.style.display = 'none');
+                for (let i = startIndex; i < endIndex && i < filteredRows.length; i++) {
+                    filteredRows[i].style.display = '';
+                }
+
+                applyPercentageColors();
+                updatePaginationInfo();
+            }
+
+            // Filter table based on search input
+            function filterTable() {
+                const searchTerm = searchInput.value.toLowerCase();
+
+                filteredRows = allRows.filter(row => {
+                    const text = row.textContent.toLowerCase();
+                    return text.includes(searchTerm);
+                });
+
+                // Apply status filter if any status is selected
+                const selectedStatuses = Array.from(statusCheckboxes)
+                    .filter(cb => cb.checked && cb.dataset.status !== 'all')
+                    .map(cb => cb.dataset.status);
+
+                if (selectedStatuses.length > 0) {
+                    filteredRows = filteredRows.filter(row => {
+                        const statusBadge = row.querySelector('.badge-status-shortlisted, .badge-status-accepted, .badge-status-rejected, .badge-status-processed, .badge-status-pending');
+                        if (!statusBadge) return false;
+
+                        const statusClass = Array.from(statusBadge.classList)
+                            .find(cls => cls.startsWith('badge-status-'))
+                            .replace('badge-status-', '');
+
+                        return selectedStatuses.includes(statusClass);
+                    });
+                }
+
+                function adjustTableWidth() {
+                    const table = document.getElementById('applicantsTable');
+                    table.style.width = 'auto';  // reset
+                    table.style.width = table.scrollWidth + 'px'; // paksa lebar real
+                }
+
+                currentPage = 1;
+                renderTable();
+            }
+
+            document.querySelectorAll('.strengths-weaknesses-list').forEach(list => {
+                const items = list.querySelectorAll('.badge');
+
+                if (items.length > 2) {
+                    // sembunyikan item ke-3 dst
+                    items.forEach((item, index) => {
+                        if (index >= 2) item.style.display = 'none';
+                    });
+
+                    // buat badge ...more
+                    const moreBadge = document.createElement('span');
+
+                    // cek apakah strengths atau weaknesses
+                    if (items[0].classList.contains('badge-strength')) {
+                        moreBadge.className = 'badge badge-more-strengths';
+                    } else {
+                        moreBadge.className = 'badge badge-more-weaknesses';
+                    }
+
+                    moreBadge.textContent = '...';
+                    list.appendChild(moreBadge);
+                }
+            });
+
+            // Handle search input
+            searchInput.addEventListener('input', filterTable);
+
+            // Handle page length change
+            lengthSelect.addEventListener('change', () => {
+                rowsPerPage = parseInt(lengthSelect.value);
+                currentPage = 1;
+                renderTable();
+            });
+
+            // Handle column visibility
+            columnCheckboxes.forEach(checkbox => {
+                const columnIndex = parseInt(checkbox.dataset.column);
+                const isChecked = checkbox.checked;
+
+                const headerCell = table.querySelectorAll('th')[columnIndex];
+                const bodyCells = table.querySelectorAll(`tbody tr td:nth-child(${columnIndex + 1})`);
+
+                if (isChecked) {
+                    headerCell.style.display = '';
+                    bodyCells.forEach(cell => cell.style.display = '');
+                } else {
+                    headerCell.style.display = 'none';
+                    bodyCells.forEach(cell => cell.style.display = 'none');
+                }
+
+                checkbox.addEventListener('change', () => {
+                    const isChecked = checkbox.checked;
+
+                    if (isChecked) {
+                        headerCell.style.display = '';
+                        bodyCells.forEach(cell => cell.style.display = '');
+                    } else {
+                        headerCell.style.display = 'none';
+                        bodyCells.forEach(cell => cell.style.display = 'none');
+                    }
+
+                    adjustTableWidth();
+
+                    updateColumnVisibilityText();
+                });
+            });
+
+            updateColumnVisibilityText();
+
+            // Handle status filter
+            statusCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.dataset.status === 'all' && checkbox.checked) {
+                        statusCheckboxes.forEach(cb => {
+                            if (cb !== checkbox) cb.checked = false;
+                        });
+                    } else if (checkbox.checked && checkbox.dataset.status !== 'all') {
+                        statusCheckboxes.forEach(cb => {
+                            if (cb.dataset.status === 'all') cb.checked = false;
+                        });
+                    }
+                    filterTable();
+                });
+            });
+
+            // Handle pagination buttons
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                }
+            });
+
+            nextButton.addEventListener('click', () => {
+                const maxPage = Math.ceil(filteredRows.length / rowsPerPage);
+                if (currentPage < maxPage) {
+                    currentPage++;
+                    renderTable();
+                }
+            });
+
+            // Initial render
+            renderTable();
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        function toggleDropdown() {
+            const dropdown = document.getElementById('actionsDropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        // --- Print Functions (without external library) ---
+        function printFullPage() {
+            // Close dropdown first
+            document.getElementById('actionsDropdown').classList.add('hidden');
+
+            // Remove print-area class from all elements
+            document.querySelectorAll('.print-area').forEach(el => {
+                el.classList.remove('print-area');
+            });
+
+            // Add print-area class to main content
+            document.querySelector('main').classList.add('print-area');
+
+            // Trigger print dialog
+            window.print();
+        }
+
+        function printVacancyDetails() {
+            // Close dropdown first
+            document.getElementById('actionsDropdown').classList.add('hidden');
+
+            // Remove print-area class from all elements
+            document.querySelectorAll('.print-area').forEach(el => {
+                el.classList.remove('print-area');
+            });
+
+            // Add print-area class to vacancy details
+            document.getElementById('vacancyDetailsContainer').classList.add('print-area');
+
+            // Trigger print dialog
+            window.print();
+        }
+
+        function printStatistics() {
+            // Close dropdown first
+            document.getElementById('actionsDropdown').classList.add('hidden');
+
+            // Remove print-area class from all elements
+            document.querySelectorAll('.print-area').forEach(el => {
+                el.classList.remove('print-area');
+            });
+
+            // Add print-area class to statistics
+            document.getElementById('statisticsContainer').classList.add('print-area');
+
+            // Trigger print dialog
+            window.print();
+        }
+
+        // Close dropdown if user clicks outside of it
+        window.onclick = function (event) {
+            const dropdown = document.getElementById('actionsDropdown');
+            const button = event.target.closest('button[onclick="toggleDropdown()"]');
+
+            if (!button && !dropdown.contains(event.target)) {
+                dropdown.classList.add('hidden');
+            }
+        }
+
+        // === Intuitive click-to-sort ===
+        document.addEventListener("DOMContentLoaded", () => {
+            const table = document.getElementById("applicantsTable");
+            const tbody = table.querySelector("tbody");
+
+            // apply to each header cell
+            table.querySelectorAll("th").forEach((th, index) => {
+                th.style.cursor = "pointer";
+
+                th.addEventListener("click", () => {
+                    const rows = Array.from(tbody.querySelectorAll("tr"));
+                    const ascending = !th.classList.contains("sorted-asc");
+
+                    // reset classes on all headers
+                    table.querySelectorAll("th").forEach(h => {
+                        h.classList.remove("sorted-asc", "sorted-desc");
+                    });
+
+                    th.classList.add(ascending ? "sorted-asc" : "sorted-desc");
+
+                    rows.sort((a, b) => {
+                        let A = a.children[index].innerText.trim().toLowerCase();
+                        let B = b.children[index].innerText.trim().toLowerCase();
+
+                        // Try numeric compare first
+                        const numA = parseFloat(A.replace(/[^\d.-]/g, ""));
+                        const numB = parseFloat(B.replace(/[^\d.-]/g, ""));
+
+                        if (!isNaN(numA) && !isNaN(numB)) {
+                            return ascending ? numA - numB : numB - numA;
+                        }
+
+                        return ascending ? A.localeCompare(B) : B.localeCompare(A);
+                    });
+
+                    // append sorted rows
+                    rows.forEach(r => tbody.appendChild(r));
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

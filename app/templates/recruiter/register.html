@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruiter Registration - SmartHire</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+        }
+
+        .float-animation {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .pulse-animation {
+            animation: pulse-blue 2s infinite;
+        }
+
+        .animated-gradient {
+            background: linear-gradient(-45deg, #3b82f6, #1e40af, #2563eb, #1d4ed8);
+            background-size: 400% 400%;
+            animation: gradient 10s ease infinite;
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6 0%, #1e40af 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Custom button hover effect */
+        .btn-primary {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Input focus effect */
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+
+        .input-focus:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        /* Background pattern */
+        .bg-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233b82f6' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error shake animation */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        /* Success checkmark */
+        .checkmark {
+            animation: scaleIn 0.3s ease-in-out;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            animation: progress 1s ease-out;
+        }
+
+        /* Step indicator */
+        .step-active {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .step-completed {
+            background: #10b981;
+            color: white;
+        }
+
+        /* Checkbox custom */
+        .custom-checkbox {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .custom-checkbox:checked {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+            border-color: #3b82f6;
+        }
+
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen bg-pattern">
+    <!-- Header Navigation -->
+    <header class="bg-white shadow-[0_0_20px_rgba(0,0,0,0.15)] border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-lg">
+                        <i class="fas fa-brain text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">SmartHire</h1>
+                        <p class="text-sm text-gray-500">AI Engineer Portfolio Project</p>
+                    </div>
+                </div>
+                
+                <nav class="hidden lg:flex items-center space-x-6">
+                    <a href="index.html" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">Home</a>
+                    <a href="#features" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">Features</a>
+                    <a href="#demo" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">Demo</a>
+                    <a href="#contact" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">Contact</a>
+                </nav>
+
+                <div class="flex items-center space-x-3">
+                    <a href="login.html" class="text-blue-600 font-medium">
+                        Already have an account? Sign in
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex items-center justify-center min-h-[calc(100vh-80px)] py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl w-full">
+            <!-- Progress Steps -->
+            <div class="mb-8">
+                <div class="flex items-center justify-center space-x-4">
+                    <div class="flex items-center">
+                        <div id="step1" class="step-active w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300">
+                            1
+                        </div>
+                        <span class="ml-2 text-sm font-medium text-gray-900">Account Info</span>
+                    </div>
+                    <div class="w-16 h-1 bg-gray-300 rounded" id="progress1"></div>
+                    <div class="flex items-center">
+                        <div id="step2" class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center font-semibold text-gray-600 transition-all duration-300">
+                            2
+                        </div>
+                        <span class="ml-2 text-sm font-medium text-gray-500">Company Details</span>
+                    </div>
+                    <div class="w-16 h-1 bg-gray-300 rounded" id="progress2"></div>
+                    <div class="flex items-center">
+                        <div id="step3" class="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center font-semibold text-gray-600 transition-all duration-300">
+                            3
+                        </div>
+                        <span class="ml-2 text-sm font-medium text-gray-500">Complete</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registration Card -->
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <!-- Card Header -->
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-center">
+                    <div class="bg-white bg-opacity-20 rounded-full p-4 w-20 h-20 mx-auto mb-4">
+                        <i class="fas fa-user-plus text-white text-3xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-2">Create Your Account</h2>
+                    <p class="text-blue-100">Join SmartHire and start hiring smarter</p>
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-8">
+                    <!-- Registration Form -->
+                    <form id="registerForm" class="space-y-6">
+                        <!-- Step 1: Account Information -->
+                        <div id="step1Content">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Account Information</h3>
+                            
+                            <!-- Name Fields -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">
+                                        First Name
+                                    </label>
+                                    <input
+                                        id="firstName"
+                                        name="firstName"
+                                        type="text"
+                                        required
+                                        class="input-focus appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="John"
+                                    >
+                                    <p class="mt-1 text-sm text-red-600 hidden" id="firstNameError">
+                                        First name is required
+                                    </p>
+                                </div>
+                                <div>
+                                    <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Last Name
+                                    </label>
+                                    <input
+                                        id="lastName"
+                                        name="lastName"
+                                        type="text"
+                                        required
+                                        class="input-focus appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="Doe"
+                                    >
+                                    <p class="mt-1 text-sm text-red-600 hidden" id="lastNameError">
+                                        Last name is required
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Email Field -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Email Address
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-envelope text-gray-400"></i>
+                                    </div>
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        autocomplete="email"
+                                        required
+                                        class="input-focus appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="recruiter@company.com"
+                                    >
+                                </div>
+                                <p class="mt-1 text-sm text-red-600 hidden" id="emailError">
+                                    Please enter a valid email address
+                                </p>
+                            </div>
+
+                            <!-- Password Fields -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Password
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-lock text-gray-400"></i>
+                                        </div>
+                                        <input
+                                            id="password"
+                                            name="password"
+                                            type="password"
+                                            required
+                                            class="input-focus appearance-none block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="Min. 8 characters"
+                                        >
+                                        <button
+                                            type="button"
+                                            id="togglePassword"
+                                            class="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                        >
+                                            <i id="eyeIcon" class="fas fa-eye text-gray-400 hover:text-gray-600"></i>
+                                        </button>
+                                    </div>
+                                    <p class="mt-1 text-sm text-red-600 hidden" id="passwordError">
+                                        Password must be at least 8 characters
+                                    </p>
+                                </div>
+                                <div>
+                                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Confirm Password
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-lock text-gray-400"></i>
+                                        </div>
+                                        <input
+                                            id="confirmPassword"
+                                            name="confirmPassword"
+                                            type="password"
+                                            required
+                                            class="input-focus appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                            placeholder="Confirm password"
+                                        >
+                                    </div>
+                                    <p class="mt-1 text-sm text-red-600 hidden" id="confirmPasswordError">
+                                        Passwords do not match
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Phone Field -->
+                            <div>
+                                <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Phone Number
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-phone text-gray-400"></i>
+                                    </div>
+                                    <input
+                                        id="phone"
+                                        name="phone"
+                                        type="tel"
+                                        required
+                                        class="input-focus appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="+1 (555) 123-4567"
+                                    >
+                                </div>
+                                <p class="mt-1 text-sm text-red-600 hidden" id="phoneError">
+                                        Please enter a valid phone number
+                                    </p>
+                            </div>
+
+                            <!-- Next Button -->
+                            <div class="flex justify-end">
+                                <button
+                                    type="button"
+                                    id="nextToStep2"
+                                    class="btn-primary text-white font-medium py-3 px-6 rounded-lg"
+                                >
+                                    Next Step <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Company Details (Hidden initially) -->
+                        <div id="step2Content" class="hidden">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Company Details</h3>
+                            
+                            <!-- Company Name -->
+                            <div>
+                                <label for="companyName" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Company Name
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-building text-gray-400"></i>
+                                    </div>
+                                    <input
+                                        id="companyName"
+                                        name="companyName"
+                                        type="text"
+                                        required
+                                        class="input-focus appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="Acme Corporation"
+                                    >
+                                </div>
+                                <p class="mt-1 text-sm text-red-600 hidden" id="companyNameError">
+                                    Company name is required
+                                </p>
+                            </div>
+
+                            <!-- Industry and Size -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="industry" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Industry
+                                    </label>
+                                    <select
+                                        id="industry"
+                                        name="industry"
+                                        required
+                                        class="input-focus appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        <option value="">Select Industry</option>
+                                        <option value="technology">Technology</option>
+                                        <option value="healthcare">Healthcare</option>
+                                        <option value="finance">Finance</option>
+                                        <option value="education">Education</option>
+                                        <option value="retail">Retail</option>
+                                        <option value="manufacturing">Manufacturing</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                    <p class="mt-1 text-sm text-red-600 hidden" id="industryError">
+                                        Please select an industry
+                                    </p>
+                                </div>
+                                <div>
+                                    <label for="companySize" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Company Size
+                                    </label>
+                                    <select
+                                        id="companySize"
+                                        name="companySize"
+                                        required
+                                        class="input-focus appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                    >
+                                        <option value="">Select Size</option>
+                                        <option value="1-10">1-10 employees</option>
+                                        <option value="11-50">11-50 employees</option>
+                                        <option value="51-200">51-200 employees</option>
+                                        <option value="201-500">201-500 employees</option>
+                                        <option value="500+">500+ employees</option>
+                                    </select>
+                                    <p class="mt-1 text-sm text-red-600 hidden" id="companySizeError">
+                                        Please select company size
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Website -->
+                            <div>
+                                <label for="website" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Company Website
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fas fa-globe text-gray-400"></i>
+                                    </div>
+                                    <input
+                                        id="website"
+                                        name="website"
+                                        type="url"
+                                        class="input-focus appearance-none block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                        placeholder="https://www.company.com"
+                                    >
+                                </div>
+                            </div>
+
+                            <!-- Navigation Buttons -->
+                            <div class="flex justify-between">
+                                <button
+                                    type="button"
+                                    id="backToStep1"
+                                    class="bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors"
+                                >
+                                    <i class="fas fa-arrow-left mr-2"></i> Back
+                                </button>
+                                <button
+                                    type="button"
+                                    id="nextToStep3"
+                                    class="btn-primary text-white font-medium py-3 px-6 rounded-lg"
+                                >
+                                    Next Step <i class="fas fa-arrow-right ml-2"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Review & Submit (Hidden initially) -->
+                        <div id="step3Content" class="hidden">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">Review & Submit</h3>
+                            
+                            <!-- Summary Card -->
+                            <div class="bg-gray-50 rounded-lg p-6 mb-6">
+                                <h4 class="font-semibold text-gray-900 mb-4">Account Summary</h4>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Name:</span>
+                                        <span id="summaryName" class="font-medium text-gray-900"></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Email:</span>
+                                        <span id="summaryEmail" class="font-medium text-gray-900"></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Phone:</span>
+                                        <span id="summaryPhone" class="font-medium text-gray-900"></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Company:</span>
+                                        <span id="summaryCompany" class="font-medium text-gray-900"></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Industry:</span>
+                                        <span id="summaryIndustry" class="font-medium text-gray-900"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Terms and Conditions -->
+                            <div class="mb-6">
+                                <label class="flex items-start">
+                                    <input
+                                        type="checkbox"
+                                        id="terms"
+                                        name="terms"
+                                        required
+                                        class="custom-checkbox mt-1 mr-3"
+                                    >
+                                    <span class="text-sm text-gray-600">
+                                        I agree to the <a href="#" class="text-blue-600 hover:text-blue-500">Terms of Service</a> 
+                                        and <a href="#" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
+                                    </span>
+                                </label>
+                                <p class="mt-1 text-sm text-red-600 hidden" id="termsError">
+                                    You must agree to the terms and conditions
+                                </p>
+                            </div>
+
+                            <!-- Marketing Consent -->
+                            <div class="mb-6">
+                                <label class="flex items-start">
+                                    <input
+                                        type="checkbox"
+                                        id="marketing"
+                                        name="marketing"
+                                        class="custom-checkbox mt-1 mr-3"
+                                    >
+                                    <span class="text-sm text-gray-600">
+                                        I'd like to receive updates about SmartHire features and best practices
+                                    </span>
+                                </label>
+                            </div>
+
+                            <!-- Navigation Buttons -->
+                            <div class="flex justify-between">
+                                <button
+                                    type="button"
+                                    id="backToStep2"
+                                    class="bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors"
+                                >
+                                    <i class="fas fa-arrow-left mr-2"></i> Back
+                                </button>
+                                <button
+                                    type="submit"
+                                    id="submitBtn"
+                                    class="btn-primary text-white font-medium py-3 px-6 rounded-lg flex items-center"
+                                >
+                                    <span id="submitBtnText">Create Account</span>
+                                    <div id="submitSpinner" class="spinner ml-2 hidden"></div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div id="errorMessage" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                <span id="errorText">Registration failed. Please try again.</span>
+                            </div>
+                        </div>
+
+                        <!-- Success Message -->
+                        <div id="successMessage" class="hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle mr-2 checkmark"></i>
+                                <span>Account created successfully! Redirecting to login...</span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Benefits Notice -->
+            <div class="mt-8 text-center">
+                <div class="inline-flex items-center space-x-6 text-sm text-gray-600">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        <span>Free forever plan</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        <span>No credit card required</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                        <span>Cancel anytime</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Form elements
+        const registerForm = document.getElementById('registerForm');
+        const step1Content = document.getElementById('step1Content');
+        const step2Content = document.getElementById('step2Content');
+        const step3Content = document.getElementById('step3Content');
+        
+        // Step indicators
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+        const progress1 = document.getElementById('progress1');
+        const progress2 = document.getElementById('progress2');
+        
+        // Buttons
+        const nextToStep2 = document.getElementById('nextToStep2');
+        const nextToStep3 = document.getElementById('nextToStep3');
+        const backToStep1 = document.getElementById('backToStep1');
+        const backToStep2 = document.getElementById('backToStep2');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitBtnText = document.getElementById('submitBtnText');
+        const submitSpinner = document.getElementById('submitSpinner');
+        
+        // Current step tracker
+        let currentStep = 1;
+
+        // Toggle password visibility
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            if (type === 'text') {
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        });
+
+        // Email validation
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        // Phone validation
+        function validatePhone(phone) {
+            const re = /^[\d\s\-\+\(\)]+$/;
+            return re.test(phone) && phone.length >= 10;
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorText = document.getElementById('errorText');
+            const errorMessage = document.getElementById('errorMessage');
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+            errorMessage.classList.add('shake');
+            setTimeout(() => {
+                errorMessage.classList.remove('shake');
+            }, 500);
+        }
+
+        // Hide error message
+        function hideError() {
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+
+        // Show success message
+        function showSuccess() {
+            document.getElementById('successMessage').classList.remove('hidden');
+        }
+
+        // Validate step 1
+        function validateStep1() {
+            let isValid = true;
+            
+            // First name
+            const firstName = document.getElementById('firstName').value.trim();
+            if (!firstName) {
+                document.getElementById('firstNameError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('firstNameError').classList.add('hidden');
+            }
+            
+            // Last name
+            const lastName = document.getElementById('lastName').value.trim();
+            if (!lastName) {
+                document.getElementById('lastNameError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('lastNameError').classList.add('hidden');
+            }
+            
+            // Email
+            const email = document.getElementById('email').value.trim();
+            if (!validateEmail(email)) {
+                document.getElementById('emailError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('emailError').classList.add('hidden');
+            }
+            
+            // Password
+            const password = document.getElementById('password').value;
+            if (password.length < 8) {
+                document.getElementById('passwordError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('passwordError').classList.add('hidden');
+            }
+            
+            // Confirm password
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            if (password !== confirmPassword) {
+                document.getElementById('confirmPasswordError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('confirmPasswordError').classList.add('hidden');
+            }
+            
+            // Phone
+            const phone = document.getElementById('phone').value.trim();
+            if (!validatePhone(phone)) {
+                document.getElementById('phoneError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('phoneError').classList.add('hidden');
+            }
+            
+            return isValid;
+        }
+
+        // Validate step 2
+        function validateStep2() {
+            let isValid = true;
+            
+            // Company name
+            const companyName = document.getElementById('companyName').value.trim();
+            if (!companyName) {
+                document.getElementById('companyNameError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('companyNameError').classList.add('hidden');
+            }
+            
+            // Industry
+            const industry = document.getElementById('industry').value;
+            if (!industry) {
+                document.getElementById('industryError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('industryError').classList.add('hidden');
+            }
+            
+            // Company size
+            const companySize = document.getElementById('companySize').value;
+            if (!companySize) {
+                document.getElementById('companySizeError').classList.remove('hidden');
+                isValid = false;
+            } else {
+                document.getElementById('companySizeError').classList.add('hidden');
+            }
+            
+            return isValid;
+        }
+
+        // Update step indicators
+        function updateStepIndicators(step) {
+            // Reset all steps
+            step1.classList.remove('step-active', 'step-completed');
+            step2.classList.remove('step-active', 'step-completed');
+            step3.classList.remove('step-active', 'step-completed');
+            step1.classList.add('bg-gray-300', 'text-gray-600');
+            step2.classList.add('bg-gray-300', 'text-gray-600');
+            step3.classList.add('bg-gray-300', 'text-gray-600');
+            
+            // Update progress bars
+            progress1.classList.remove('bg-blue-500');
+            progress2.classList.remove('bg-blue-500');
+            progress1.classList.add('bg-gray-300');
+            progress2.classList.add('bg-gray-300');
+            
+            if (step >= 1) {
+                step1.classList.remove('bg-gray-300', 'text-gray-600');
+                step1.classList.add('step-active');
+                if (step > 1) {
+                    step1.classList.remove('step-active');
+                    step1.classList.add('step-completed');
+                    progress1.classList.remove('bg-gray-300');
+                    progress1.classList.add('bg-blue-500', 'progress-bar');
+                }
+            }
+            
+            if (step >= 2) {
+                step2.classList.remove('bg-gray-300', 'text-gray-600');
+                step2.classList.add('step-active');
+                if (step > 2) {
+                    step2.classList.remove('step-active');
+                    step2.classList.add('step-completed');
+                    progress2.classList.remove('bg-gray-300');
+                    progress2.classList.add('bg-blue-500', 'progress-bar');
+                }
+            }
+            
+            if (step >= 3) {
+                step3.classList.remove('bg-gray-300', 'text-gray-600');
+                step3.classList.add('step-active');
+            }
+        }
+
+        // Update summary
+        function updateSummary() {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const companyName = document.getElementById('companyName').value;
+            const industry = document.getElementById('industry');
+            
+            document.getElementById('summaryName').textContent = `${firstName} ${lastName}`;
+            document.getElementById('summaryEmail').textContent = email;
+            document.getElementById('summaryPhone').textContent = phone;
+            document.getElementById('summaryCompany').textContent = companyName;
+            document.getElementById('summaryIndustry').textContent = industry.options[industry.selectedIndex].text;
+        }
+
+        // Navigation event listeners
+        nextToStep2.addEventListener('click', function() {
+            if (validateStep1()) {
+                step1Content.classList.add('hidden');
+                step2Content.classList.remove('hidden');
+                currentStep = 2;
+                updateStepIndicators(2);
+            }
+        });
+
+        nextToStep3.addEventListener('click', function() {
+            if (validateStep2()) {
+                step2Content.classList.add('hidden');
+                step3Content.classList.remove('hidden');
+                currentStep = 3;
+                updateStepIndicators(3);
+                updateSummary();
+            }
+        });
+
+        backToStep1.addEventListener('click', function() {
+            step2Content.classList.add('hidden');
+            step1Content.classList.remove('hidden');
+            currentStep = 1;
+            updateStepIndicators(1);
+        });
+
+        backToStep2.addEventListener('click', function() {
+            step3Content.classList.add('hidden');
+            step2Content.classList.remove('hidden');
+            currentStep = 2;
+            updateStepIndicators(2);
+        });
+
+        // Form submission
+        registerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Check terms
+            const terms = document.getElementById('terms').checked;
+            if (!terms) {
+                document.getElementById('termsError').classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('termsError').classList.add('hidden');
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtnText.textContent = 'Creating Account...';
+            submitSpinner.classList.remove('hidden');
+            
+            // Simulate API call
+            setTimeout(() => {
+                showSuccess();
+                setTimeout(() => {
+                    // Redirect to login page
+                    window.location.href = 'login.html';
+                }, 2000);
+            }, 2000);
+        });
+
+        // Add input animations
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('scale-105');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('scale-105');
+            });
+        });
+    </script>
+</body>
+
+</html>
